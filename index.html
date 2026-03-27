@@ -48,10 +48,36 @@
         .stat-number {
             font-size: 2em;
             font-weight: bold;
+            color: white;
         }
         .stat-label {
             font-size: 0.9em;
             opacity: 0.9;
+            font-weight: 500;
+            color: white;
+        }
+        .stats-breakdown {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            margin-top: 25px;
+        }
+        .breakdown-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .breakdown-label {
+            font-size: 0.85em;
+            opacity: 0.85;
+            color: white;
+        }
+        .breakdown-value {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: white;
         }
         .business-section {
             background: white;
@@ -774,16 +800,34 @@
                     <div class="stat-label">运营床位</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-number">18</div>
-                    <div class="stat-label">城市覆盖</div>
+                    <div class="stat-number">15</div>
+                    <div class="stat-label">已开展</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-number">432</div>
-                    <div class="stat-label">居家社区网点</div>
+                    <div class="stat-number">11</div>
+                    <div class="stat-label">积极拓展</div>
                 </div>
                 <div class="stat-item">
-                    <div class="stat-number">16</div>
-                    <div class="stat-label">业务线</div>
+                    <div class="stat-number">429</div>
+                    <div class="stat-label">经营单元</div>
+                </div>
+            </div>
+            <div class="stats-breakdown">
+                <div class="breakdown-item">
+                    <span class="breakdown-label">机构</span>
+                    <span class="breakdown-value">15</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">社区</span>
+                    <span class="breakdown-value">311</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">居家政采</span>
+                    <span class="breakdown-value">55</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">居家长护</span>
+                    <span class="breakdown-value">63</span>
                 </div>
             </div>
         </div>
