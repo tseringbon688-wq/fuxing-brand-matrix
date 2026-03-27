@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>敏感性分析工具 - UE模型</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; }
+
+        /* 顶部 */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        .header-left h1 { color: #fff; font-size: 28px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .header-left .subtitle { color: rgba(255,255,255,0.8); font-size: 14px; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 14px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .back-link:hover { background: rgba(255,255,255,0.3); transform: translateX(-3px); }
+
+        /* 城市选择卡片 */
+        .city-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        .city-card {
+            background: #fff;
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 3px solid transparent;
+        }
+        .city-card:hover { transform: translateY(-4px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
+        .city-card.active { border-color: #667eea; background: linear-gradient(135deg, #f8f9ff 0%, #fff 100%); }
+        .city-card.c1 .city-icon { background: #1da1f2; }
+        .city-card.c2 .city-icon { background: #65a30d; }
+        .city-card.c3 .city-icon { background: #f59e0b; }
+        .city-card.c4 .city-icon { background: #ef4444; }
+        .city-card.c5 .city-icon { background: #8b5cf6; }
+        .city-card.c6 .city-icon { background: #ec4899; }
+        .city-card.c7 .city-icon { background: #06b6d4; }
+        .city-card.c8 .city-icon { background: #84cc16; }
+        .city-icon {
+            width: 56px; height: 56px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 10px; color: #fff; font-size: 22px; font-weight: 700;
+        }
+        .city-name { font-size: 18px; font-weight: 600; color: #1a1a2e; margin-bottom: 2px; }
+        .city-desc { font-size: 12px; color: #64748b; }
+        .city-kpi { font-size: 13px; color: #667eea; font-weight: 600; margin-top: 6px; }
+
+        /* 分析面板 */
+        .analysis-panel {
+            background: #fff;
+            border-radius: 20px;
+            padding: 32px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            display: none;
+        }
+        .analysis-panel.visible { display: block; }
+
+        /* KPI仪表 */
+        .kpi-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-bottom: 24px; }
+        .kpi-box {
+            background: linear-gradient(135deg, #f8f9ff 0%, #fff 100%);
+            border-radius: 12px; padding: 16px; text-align: center; border: 1px solid #e2e8f0;
+        }
+        .kpi-box.highlight { border-color: #667eea; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .kpi-box.highlight .kpi-label, .kpi-box.highlight .kpi-value, .kpi-box.highlight .kpi-sub { color: #fff !important; }
+        .kpi-label { font-size: 11px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .kpi-value { font-size: 24px; font-weight: 700; color: #1a1a2e; }
+        .kpi-value.good { color: #22c55e; }
+        .kpi-value.warn { color: #f59e0b; }
+        .kpi-value.bad { color: #ef4444; }
+        .kpi-sub { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+
+        /* 健康线仪表 */
+        .health-gauge {
+            background: linear-gradient(135deg, #f8f9ff 0%, #fff 100%);
+            border-radius: 16px; padding: 24px; margin-bottom: 24px; border: 2px solid #e2e8f0;
+        }
+        .gauge-title { font-size: 14px; font-weight: 600; color: #64748b; margin-bottom: 16px; text-align: center; }
+        .gauge-container {
+            position: relative; height: 50px;
+            background: linear-gradient(to right, #ef4444 0%, #f59e0b 30%, #22c55e 50%, #f59e0b 70%, #ef4444 100%);
+            border-radius: 25px; overflow: hidden;
+        }
+        .gauge-marker {
+            position: absolute; top: 0; width: 4px; height: 100%; background: #1a1a2e;
+            transform: translateX(-50%); transition: left 0.3s ease;
+        }
+        .gauge-marker::after {
+            content: ''; position: absolute; top: -8px; left: 50%; transform: translateX(-50%);
+            border-left: 8px solid transparent; border-right: 8px solid transparent; border-top: 8px solid #1a1a2e;
+        }
+        .gauge-labels { display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: #64748b; }
+        .gauge-labels .healthy-line { color: #22c55e; font-weight: 600; }
+        .gauge-value-display { text-align: center; margin-top: 10px; }
+        .gauge-current { font-size: 32px; font-weight: 700; }
+        .gauge-current.good { color: #22c55e; }
+        .gauge-current.warn { color: #f59e0b; }
+        .gauge-current.bad { color: #ef4444; }
+
+        /* 滑块控制区 */
+        .sliders-section { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
+        .slider-card { background: #f8fafc; border-radius: 12px; padding: 18px; }
+        .slider-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .slider-title { font-weight: 600; color: #1a1a2e; font-size: 14px; }
+        .slider-value {
+            font-weight: 600; font-size: 13px; padding: 3px 10px;
+            border-radius: 20px; background: #fff; border: 1px solid #e2e8f0;
+        }
+        .slider-value.increase { color: #ef4444; background: #fef2f2; border-color: #fecaca; }
+        .slider-value.decrease { color: #22c55e; background: #f0fdf4; border-color: #bbf7d0; }
+        .slider-value.normal { color: #64748b; }
+        input[type="range"] {
+            width: 100%; height: 6px; -webkit-appearance: none;
+            background: linear-gradient(to right, #22c55e, #e2e8f0, #ef4444);
+            border-radius: 3px; outline: none;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 20px; height: 20px;
+            background: #667eea; border-radius: 50%; cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        .slider-labels { display: flex; justify-content: space-between; font-size: 11px; color: #94a3b8; margin-top: 4px; }
+        .slider-labels .base-label { color: #667eea; font-weight: 600; }
+
+        /* 图表 */
+        .chart-section { background: #f8fafc; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+        .chart-title { font-size: 14px; font-weight: 600; color: #1a1a2e; margin-bottom: 16px; }
+        .chart-wrapper { height: 280px; position: relative; }
+
+        /* 风险表格 */
+        .risk-table { margin-bottom: 24px; }
+        .risk-row {
+            display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 8px;
+            padding: 10px 12px; border-bottom: 1px solid #f1f5f9; align-items: center; font-size: 13px;
+        }
+        .risk-row.header { background: #f8fafc; border-radius: 8px 8px 0 0; font-weight: 600; color: #64748b; }
+        .risk-name { color: #475569; }
+        .risk-current { color: #64748b; }
+        .risk-change { font-weight: 600; }
+        .risk-change.negative { color: #ef4444; }
+        .risk-change.positive { color: #22c55e; }
+        .risk-status { padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 600; text-align: center; }
+        .risk-status.good { background: #dcfce7; color: #22c55e; }
+        .risk-status.warn { background: #fef3c7; color: #f59e0b; }
+        .risk-status.bad { background: #fee2e2; color: #ef4444; }
+
+        /* 变量贡献 */
+        .impact-section { margin-bottom: 24px; }
+        .impact-bar { display: flex; align-items: center; margin-bottom: 10px; }
+        .impact-label { width: 100px; font-size: 13px; color: #475569; }
+        .impact-track { flex: 1; height: 22px; background: #f1f5f9; border-radius: 11px; overflow: hidden; }
+        .impact-fill { height: 100%; border-radius: 11px; transition: width 0.3s ease; }
+        .impact-val { width: 60px; text-align: right; font-size: 13px; font-weight: 600; }
+
+        /* 底部操作栏 */
+        .action-bar {
+            display: flex; justify-content: center; gap: 16px; margin-top: 24px;
+        }
+        .btn {
+            padding: 12px 28px; border: none; border-radius: 10px; cursor: pointer;
+            font-size: 14px; font-weight: 600; transition: all 0.2s;
+            text-decoration: none; display: inline-block;
+        }
+        .btn-outline { background: #fff; color: #667eea; border: 2px solid #667eea; }
+        .btn-outline:hover { background: #f8f9ff; }
+        .btn-reset { background: #f8fafc; color: #64748b; border: 1px solid #e2e8f0; }
+        .btn-reset:hover { background: #f1f5f9; }
+
+        @media (max-width: 768px) {
+            .city-cards { grid-template-columns: 1fr; }
+            .kpi-row { grid-template-columns: repeat(2, 1fr); }
+            .sliders-section { grid-template-columns: 1fr; }
+            .header { flex-direction: column; gap: 12px; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-left">
+                <h1>敏感性分析工具</h1>
+                <p class="subtitle">选择城市，调整变量，实时查看LTV/CAC变化</p>
+            </div>
+            <a href="城市UE对比分析-增强版.html" class="back-link">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                返回城市对比
+            </a>
+        </div>
+
+        <!-- 城市选择（动态生成） -->
+        <div class="city-cards" id="cityCards"></div>
+
+        <!-- 分析面板 -->
+        <div class="analysis-panel" id="analysisPanel">
+            <!-- 面板标题 -->
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                <h2 id="panelCityName" style="font-size:20px;color:#1a1a2e;"></h2>
+                <button class="btn btn-reset" onclick="showCityCards()" style="padding:8px 16px;font-size:13px;">← 切换城市</button>
+            </div>
+
+            <!-- KPI仪表 -->
+            <div class="kpi-row">
+                <div class="kpi-box">
+                    <div class="kpi-label">LTV/CAC</div>
+                    <div class="kpi-value" id="kpiRatio">-</div>
+                    <div class="kpi-sub">健康线 3.0x</div>
+                </div>
+                <div class="kpi-box">
+                    <div class="kpi-label">单客月边际贡献</div>
+                    <div class="kpi-value" id="kpiProfit">-</div>
+                    <div class="kpi-sub" id="kpiProfitBase"></div>
+                </div>
+                <div class="kpi-box">
+                    <div class="kpi-label">LTV</div>
+                    <div class="kpi-value" id="kpiLtv">-</div>
+                    <div class="kpi-sub" id="kpiLtvMonths"></div>
+                </div>
+                <div class="kpi-box">
+                    <div class="kpi-label">盈亏平衡</div>
+                    <div class="kpi-value" id="kpiBreakeven">-</div>
+                    <div class="kpi-sub" id="kpiBreakevenBase"></div>
+                </div>
+                <div class="kpi-box highlight">
+                    <div class="kpi-label">距健康线</div>
+                    <div class="kpi-value" id="kpiMargin">-</div>
+                    <div class="kpi-sub">容错空间</div>
+                </div>
+            </div>
+
+            <!-- 健康线仪表 -->
+            <div class="health-gauge">
+                <div class="gauge-title">LTV/CAC 健康线（3.0倍）</div>
+                <div class="gauge-container">
+                    <div class="gauge-marker" id="gaugeMarker"></div>
+                </div>
+                <div class="gauge-labels">
+                    <span>0</span>
+                    <span>2.0</span>
+                    <span class="healthy-line">3.0 (健康线)</span>
+                    <span>4.0</span>
+                    <span>5.0</span>
+                </div>
+                <div class="gauge-value-display">
+                    当前值：<span class="gauge-current" id="gaugeCurrent">-</span>
+                </div>
+            </div>
+
+            <!-- 滑块控制 -->
+            <div class="sliders-section">
+                <div class="slider-card">
+                    <div class="slider-header">
+                        <span class="slider-title">社保合规比例</span>
+                        <span class="slider-value normal" id="socialValue">-</span>
+                    </div>
+                    <input type="range" id="socialSlider" min="0" max="50" value="0" step="1">
+                    <div class="slider-labels" id="socialLabels"></div>
+                </div>
+                <div class="slider-card">
+                    <div class="slider-header">
+                        <span class="slider-title">单小时护理员工资</span>
+                        <span class="slider-value normal" id="wageValue">-</span>
+                    </div>
+                    <input type="range" id="wageSlider" min="0" max="80" value="0" step="1">
+                    <div class="slider-labels" id="wageLabels"></div>
+                </div>
+                <div class="slider-card">
+                    <div class="slider-header">
+                        <span class="slider-title">客户生命周期</span>
+                        <span class="slider-value normal" id="lifecycleValue">-</span>
+                    </div>
+                    <input type="range" id="lifecycleSlider" min="1" max="36" value="0" step="1">
+                    <div class="slider-labels" id="lifecycleLabels"></div>
+                </div>
+                <div class="slider-card">
+                    <div class="slider-header">
+                        <span class="slider-title">长护险费率</span>
+                        <span class="slider-value normal" id="feeValue">-</span>
+                    </div>
+                    <input type="range" id="feeSlider" min="0" max="150" value="0" step="1">
+                    <div class="slider-labels" id="feeLabels"></div>
+                </div>
+                <div class="slider-card">
+                    <div class="slider-header">
+                        <span class="slider-title">管理绩效</span>
+                        <span class="slider-value normal" id="mgmtValue">-</span>
+                    </div>
+                    <input type="range" id="mgmtSlider" min="0" max="100" value="0" step="1">
+                    <div class="slider-labels" id="mgmtLabels"></div>
+                </div>
+                <div class="slider-card">
+                    <div class="slider-header">
+                        <span class="slider-title">获客成本</span>
+                        <span class="slider-value normal" id="cacValue">-</span>
+                    </div>
+                    <input type="range" id="cacSlider" min="100" max="5000" value="0" step="100">
+                    <div class="slider-labels" id="cacLabels"></div>
+                </div>
+            </div>
+
+            <!-- 图表 -->
+            <div class="chart-section">
+                <div class="chart-title">各变量对LTV/CAC的影响程度</div>
+                <div class="chart-wrapper">
+                    <canvas id="impactChart"></canvas>
+                </div>
+            </div>
+
+            <!-- 风险表格 -->
+            <div class="risk-table">
+                <div class="risk-row header">
+                    <span>变量</span>
+                    <span>当前值</span>
+                    <span>变化</span>
+                    <span>状态</span>
+                </div>
+                <div id="riskRows"></div>
+            </div>
+
+            <!-- 变量贡献 -->
+            <div class="impact-section">
+                <div class="chart-title">变量敏感度排名（绝对影响力）</div>
+                <div id="impactBars"></div>
+            </div>
+
+            <!-- 底部操作 -->
+            <div class="action-bar">
+                <button class="btn btn-reset" onclick="resetSliders()">重置所有滑块</button>
+                <a href="城市UE对比分析-增强版.html" class="btn btn-outline">返回城市对比</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 从URL参数读取城市数据
+        let cityData = {};
+        let currentCityKey = null;
+        let baseData = null;
+        let impactChart = null;
+
+        function initFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            const dataStr = params.get('data');
+            if (!dataStr) {
+                document.getElementById('cityCards').innerHTML = '<p style="color:#fff;text-align:center;padding:40px;">未检测到城市数据，请从<a href="城市UE对比分析-增强版.html" style="color:#fff;text-decoration:underline;">城市对比页面</a>进入。</p>';
+                return;
+            }
+            try {
+                cityData = JSON.parse(decodeURIComponent(dataStr));
+            } catch(e) {
+                document.getElementById('cityCards').innerHTML = '<p style="color:#fff;text-align:center;padding:40px;">数据解析失败，请从<a href="城市UE对比分析-增强版.html" style="color:#fff;text-decoration:underline;">城市对比页面</a>重新进入。</p>';
+                return;
+            }
+            renderCityCards();
+        }
+
+        function renderCityCards() {
+            const keys = Object.keys(cityData);
+            const colors = ['c1', 'c2', 'c3', 'c4', 'c5', 'c6', 'c7', 'c8'];
+            let html = '';
+            keys.forEach((key, i) => {
+                const c = cityData[key];
+                const ue = calcUE(c);
+                const firstChar = c.name.charAt(0);
+                const cost = (c.wage * c.hours) + (c.social * 1700 * c.hours / c.hours) + c.mgmt + (c.cac / c.lifecycle);
+                html += `
+                <div class="city-card ${colors[i] || 'c1'}" onclick="selectCity('${key}')">
+                    <div class="city-icon">${firstChar}</div>
+                    <div class="city-name">${c.name}</div>
+                    <div class="city-desc">费率¥${c.fee}/时 · ${c.hours}h/月 · ${c.lifecycle}月周期</div>
+                    <div class="city-kpi">LTV/CAC ${ue.ltvCac.toFixed(2)}x</div>
+                    <div class="city-cost">单客月成本¥${Math.round(cost)}</div>
+                </div>`;
+            });
+            document.getElementById('cityCards').innerHTML = html;
+        }
+
+        // 选择城市
+        function selectCity(key) {
+            currentCityKey = key;
+            baseData = { ...cityData[key] };
+
+            // 高亮选中卡片
+            const keys = Object.keys(cityData);
+            keys.forEach((k, i) => {
+                const card = document.querySelectorAll('.city-card')[i];
+                if (card) card.classList.toggle('active', k === key);
+            });
+
+            document.getElementById('cityCards').style.display = 'none';
+            document.getElementById('analysisPanel').classList.add('visible');
+
+            document.getElementById('panelCityName').textContent = baseData.name + ' · 敏感性分析';
+
+            initSliderRanges();
+            resetSliders();
+            initChart();
+        }
+
+        // 返回城市选择
+        function showCityCards() {
+            document.getElementById('cityCards').style.display = 'grid';
+            document.getElementById('analysisPanel').classList.remove('visible');
+            if (impactChart) { impactChart.destroy(); impactChart = null; }
+        }
+
+        // 生成滑块刻度标签（按值大小排序，基准值高亮）
+        function makeSliderLabels(min, mid, base, max, formatFn) {
+            // 收集所有标记点，按值排序
+            const points = [
+                { val: min, text: formatFn(min), isBase: false },
+                { val: mid, text: formatFn(mid), isBase: false },
+                { val: base, text: formatFn(base), isBase: true },
+                { val: max, text: formatFn(max), isBase: false }
+            ];
+            // 去重（值相同的只保留一个，优先保留基准）
+            const unique = [];
+            const seen = new Set();
+            for (const p of points) {
+                const key = p.val.toString();
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    unique.push(p);
+                } else if (p.isBase) {
+                    // 用基准覆盖非基准
+                    const idx = unique.findIndex(u => u.val === p.val);
+                    unique[idx] = p;
+                }
+            }
+            unique.sort((a, b) => a.val - b.val);
+            return unique.map(p => p.isBase
+                ? `<span class="base-label">${p.text}（基准）</span>`
+                : `<span>${p.text}</span>`
+            ).join('');
+        }
+
+        // 初始化滑块范围（绝对值模式）
+        function initSliderRanges() {
+            if (!baseData) return;
+
+            // 社保：0% ~ 50%
+            const socialPct = Math.round(baseData.social * 100);
+            const socialSlider = document.getElementById('socialSlider');
+            socialSlider.min = 0;
+            socialSlider.max = 50;
+            socialSlider.step = 1;
+            socialSlider.value = socialPct;
+            document.getElementById('socialLabels').innerHTML =
+                makeSliderLabels(0, 25, socialPct, 50, v => v + '%');
+
+            // 工资：0 ~ 80
+            const wageBase = baseData.wage;
+            const wageSlider = document.getElementById('wageSlider');
+            wageSlider.min = 0;
+            wageSlider.max = 80;
+            wageSlider.step = 1;
+            wageSlider.value = wageBase;
+            document.getElementById('wageLabels').innerHTML =
+                makeSliderLabels(0, 40, wageBase, 80, v => '¥' + v + '/时');
+
+            // 生命周期：1 ~ 36
+            const lcBase = baseData.lifecycle;
+            const lcSlider = document.getElementById('lifecycleSlider');
+            lcSlider.min = 1;
+            lcSlider.max = 36;
+            lcSlider.step = 1;
+            lcSlider.value = lcBase;
+            document.getElementById('lifecycleLabels').innerHTML =
+                makeSliderLabels(1, 18, lcBase, 36, v => v + '月');
+
+            // 费率：0 ~ 150
+            const feeBase = baseData.fee;
+            const feeSlider = document.getElementById('feeSlider');
+            feeSlider.min = 0;
+            feeSlider.max = 150;
+            feeSlider.step = 1;
+            feeSlider.value = feeBase;
+            document.getElementById('feeLabels').innerHTML =
+                makeSliderLabels(0, 75, feeBase, 150, v => '¥' + v + '/时');
+
+            // 管理绩效：0 ~ 100
+            const mgmtBase = baseData.mgmt;
+            const mgmtSlider = document.getElementById('mgmtSlider');
+            mgmtSlider.min = 0;
+            mgmtSlider.max = 100;
+            mgmtSlider.step = 1;
+            mgmtSlider.value = mgmtBase;
+            document.getElementById('mgmtLabels').innerHTML =
+                makeSliderLabels(0, 50, mgmtBase, 100, v => '¥' + v);
+
+            // 获客成本：100 ~ 5000
+            const cacBase = baseData.cac;
+            const cacSlider = document.getElementById('cacSlider');
+            cacSlider.min = 100;
+            cacSlider.max = 5000;
+            cacSlider.step = 100;
+            cacSlider.value = cacBase;
+            document.getElementById('cacLabels').innerHTML =
+                makeSliderLabels(100, 2500, cacBase, 5000, v => '¥' + v);
+        }
+
+        // 重置所有滑块到基准值
+        function resetSliders() {
+            if (!baseData) return;
+            document.getElementById('socialSlider').value = Math.round(baseData.social * 100);
+            document.getElementById('wageSlider').value = baseData.wage;
+            document.getElementById('lifecycleSlider').value = baseData.lifecycle;
+            document.getElementById('feeSlider').value = baseData.fee;
+            document.getElementById('mgmtSlider').value = baseData.mgmt;
+            document.getElementById('cacSlider').value = baseData.cac;
+            updateAnalysis();
+        }
+
+        // 获取当前滑块参数（绝对值）
+        function getAdjustedParams() {
+            return {
+                fee: parseInt(document.getElementById('feeSlider').value),
+                wage: parseInt(document.getElementById('wageSlider').value),
+                social: parseInt(document.getElementById('socialSlider').value) / 100,
+                lifecycle: Math.max(1, parseInt(document.getElementById('lifecycleSlider').value)),
+                mgmt: parseInt(document.getElementById('mgmtSlider').value),
+                cac: Math.max(100, parseInt(document.getElementById('cacSlider').value)),
+                hours: baseData.hours,
+                workload: baseData.workload,
+                socialBase: baseData.socialBase,
+                fixedCost: baseData.fixedCost
+            };
+        }
+
+        // 计算UE
+        function calcUE(p) {
+            const ratio = p.workload / p.hours;
+            const socialPer = (p.socialBase * p.social) / ratio;
+            const marketing = p.cac / p.lifecycle;
+            const revenue = p.fee * p.hours;
+            const wageCost = p.wage * p.hours;
+            const totalCost = wageCost + socialPer + p.mgmt + marketing;
+            const profit = revenue - totalCost;
+            const ltv = profit * p.lifecycle;
+            const ltvCac = ltv / p.cac;
+            const breakeven = Math.ceil(p.fixedCost / Math.max(1, profit));
+            return { ratio, socialPer, marketing, revenue, wageCost, totalCost, profit, ltv, ltvCac, breakeven };
+        }
+
+        // 更新分析
+        function updateAnalysis() {
+            if (!currentCityKey || !baseData) return;
+
+            const params = getAdjustedParams();
+            const ue = calcUE(params);
+            const baseUE = calcUE(baseData);
+
+            // KPI
+            const ratioClass = ue.ltvCac >= 3 ? 'good' : (ue.ltvCac >= 2.5 ? 'warn' : 'bad');
+            document.getElementById('kpiRatio').className = `kpi-value ${ratioClass}`;
+            document.getElementById('kpiRatio').textContent = ue.ltvCac.toFixed(2);
+            document.getElementById('kpiProfit').textContent = '¥' + Math.round(ue.profit);
+            document.getElementById('kpiProfitBase').textContent = '基准¥' + Math.round(baseUE.profit);
+            document.getElementById('kpiLtv').textContent = '¥' + Math.round(ue.ltv).toLocaleString();
+            document.getElementById('kpiLtvMonths').textContent = params.lifecycle + '个月';
+            document.getElementById('kpiBreakeven').textContent = ue.breakeven + '人';
+            document.getElementById('kpiBreakevenBase').textContent = '基准' + Math.ceil(baseUE.breakeven) + '人';
+
+            const margin = ue.ltvCac - 3;
+            document.getElementById('kpiMargin').textContent = (margin >= 0 ? '+' : '') + margin.toFixed(2);
+            document.getElementById('kpiMargin').className = `kpi-value ${margin >= 0 ? 'good' : 'bad'}`;
+
+            // 健康线仪表
+            const gaugePct = Math.min(100, Math.max(0, (ue.ltvCac / 5) * 100));
+            document.getElementById('gaugeMarker').style.left = gaugePct + '%';
+            const gc = document.getElementById('gaugeCurrent');
+            gc.textContent = ue.ltvCac.toFixed(2);
+            gc.className = `gauge-current ${ratioClass}`;
+
+            // 滑块值显示（绝对值）
+            updateSliderDispAbsolute();
+
+            // 风险表格
+            updateRiskTable(params, baseUE);
+
+            // 影响图表
+            updateImpactChart(params, baseUE);
+
+            // 贡献条
+            updateImpactBars(params, baseUE);
+        }
+
+        function updateSliderDispAbsolute() {
+            // 直接显示当前绝对值
+            const socialPct = parseInt(document.getElementById('socialSlider').value);
+            const wageVal = parseInt(document.getElementById('wageSlider').value);
+            const lcVal = parseInt(document.getElementById('lifecycleSlider').value);
+            const feeVal = parseInt(document.getElementById('feeSlider').value);
+            const mgmtVal = parseInt(document.getElementById('mgmtSlider').value);
+            const cacVal = parseInt(document.getElementById('cacSlider').value);
+
+            setSliderDisp('socialValue', socialPct + '%', socialPct === Math.round(baseData.social * 100) ? 'normal' : (socialPct > Math.round(baseData.social * 100) ? 'increase' : 'decrease'));
+            setSliderDisp('wageValue', '¥' + wageVal + '/时', wageVal === baseData.wage ? 'normal' : (wageVal > baseData.wage ? 'increase' : 'decrease'));
+            setSliderDisp('lifecycleValue', lcVal + '月', lcVal === baseData.lifecycle ? 'normal' : (lcVal > baseData.lifecycle ? 'decrease' : 'increase'));
+            setSliderDisp('feeValue', '¥' + feeVal + '/时', feeVal === baseData.fee ? 'normal' : (feeVal > baseData.fee ? 'decrease' : 'increase'));
+            setSliderDisp('mgmtValue', '¥' + mgmtVal, mgmtVal === baseData.mgmt ? 'normal' : (mgmtVal > baseData.mgmt ? 'increase' : 'decrease'));
+            setSliderDisp('cacValue', '¥' + cacVal, cacVal === baseData.cac ? 'normal' : (cacVal > baseData.cac ? 'increase' : 'decrease'));
+        }
+
+        function setSliderDisp(id, text, cls) {
+            const el = document.getElementById(id);
+            el.textContent = text;
+            el.className = 'slider-value ' + cls;
+        }
+
+        function updateRiskTable(params, baseUE) {
+            const scenarios = [
+                { name: '社保+5%', social: params.social + 0.05 },
+                { name: '社保-5%', social: Math.max(0, params.social - 0.05) },
+                { name: '工资+¥4/时', wage: params.wage + 4 },
+                { name: '工资-¥4/时', wage: Math.max(0, params.wage - 4) },
+                { name: '周期+3月', lifecycle: params.lifecycle + 3 },
+                { name: '周期-3月', lifecycle: Math.max(1, params.lifecycle - 3) },
+                { name: '费率+¥5/时', fee: params.fee + 5 },
+                { name: '费率-¥5/时', fee: Math.max(0, params.fee - 5) },
+                { name: '管理绩效+¥10', mgmt: params.mgmt + 10 },
+                { name: '管理绩效-¥10', mgmt: Math.max(0, params.mgmt - 10) },
+                { name: '获客成本+¥300', cac: params.cac + 300 },
+                { name: '获客成本-¥300', cac: Math.max(100, params.cac - 300) }
+            ];
+
+            document.getElementById('riskRows').innerHTML = scenarios.map(s => {
+                const testUE = calcUE({ ...params, ...s });
+                const change = testUE.ltvCac - baseUE.ltvCac;
+                const status = testUE.ltvCac >= 3 ? 'good' : (testUE.ltvCac >= 2.5 ? 'warn' : 'bad');
+                const statusText = testUE.ltvCac >= 3 ? '健康' : (testUE.ltvCac >= 2.5 ? '警告' : '不健康');
+                return `<div class="risk-row">
+                    <span class="risk-name">${s.name}</span>
+                    <span class="risk-current">${testUE.ltvCac.toFixed(2)}</span>
+                    <span class="risk-change ${change >= 0 ? 'positive' : 'negative'}">${change >= 0 ? '+' : ''}${change.toFixed(2)}</span>
+                    <span class="risk-status ${status}">${statusText}</span>
+                </div>`;
+            }).join('');
+        }
+
+        function initChart() {
+            if (impactChart) { impactChart.destroy(); impactChart = null; }
+            const ctx = document.getElementById('impactChart').getContext('2d');
+            impactChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['社保比例', '工资', '生命周期', '费率', '管理绩效', '获客成本'],
+                    datasets: [{
+                        label: 'LTV/CAC变化',
+                        data: [0, 0, 0, 0, 0, 0],
+                        backgroundColor: '#667eea',
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    indexAxis: 'y',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: (ctx) => `变化: ${ctx.raw >= 0 ? '+' : ''}${ctx.raw.toFixed(2)}` } }
+                    },
+                    scales: {
+                        x: { title: { display: true, text: 'LTV/CAC变化量' }, grid: { color: '#f1f5f9' } },
+                        y: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        function updateImpactChart(params, baseUE) {
+            if (!impactChart) return;
+            const impacts = [
+                calcUE({ ...params, social: params.social + 0.05 }).ltvCac - baseUE.ltvCac,
+                calcUE({ ...params, wage: params.wage + 4 }).ltvCac - baseUE.ltvCac,
+                calcUE({ ...params, lifecycle: params.lifecycle + 3 }).ltvCac - baseUE.ltvCac,
+                calcUE({ ...params, fee: params.fee + 5 }).ltvCac - baseUE.ltvCac,
+                calcUE({ ...params, mgmt: params.mgmt + 10 }).ltvCac - baseUE.ltvCac,
+                calcUE({ ...params, cac: params.cac + 300 }).ltvCac - baseUE.ltvCac
+            ];
+            impactChart.data.datasets[0].data = impacts;
+            impactChart.data.datasets[0].backgroundColor = impacts.map(v => v >= 0 ? '#22c55e' : '#ef4444');
+            impactChart.update();
+        }
+
+        function updateImpactBars(params, baseUE) {
+            const impacts = [
+                { label: '社保+5%', val: calcUE({ ...params, social: params.social + 0.05 }).ltvCac - baseUE.ltvCac },
+                { label: '工资+¥4', val: calcUE({ ...params, wage: params.wage + 4 }).ltvCac - baseUE.ltvCac },
+                { label: '周期+3月', val: calcUE({ ...params, lifecycle: params.lifecycle + 3 }).ltvCac - baseUE.ltvCac },
+                { label: '费率+¥5', val: calcUE({ ...params, fee: params.fee + 5 }).ltvCac - baseUE.ltvCac },
+                { label: '管理+¥10', val: calcUE({ ...params, mgmt: params.mgmt + 10 }).ltvCac - baseUE.ltvCac },
+                { label: '获客+¥300', val: calcUE({ ...params, cac: params.cac + 300 }).ltvCac - baseUE.ltvCac }
+            ];
+            const maxAbs = Math.max(...impacts.map(i => Math.abs(i.val)), 0.01);
+            document.getElementById('impactBars').innerHTML = impacts.map(i => {
+                const width = Math.abs(i.val) / maxAbs * 100;
+                const color = i.val >= 0 ? '#22c55e' : '#ef4444';
+                return `<div class="impact-bar">
+                    <span class="impact-label">${i.label}</span>
+                    <div class="impact-track"><div class="impact-fill" style="width:${width}%;background:${color};"></div></div>
+                    <span class="impact-val" style="color:${color}">${i.val >= 0 ? '+' : ''}${i.val.toFixed(2)}</span>
+                </div>`;
+            }).join('');
+        }
+
+        // 绑定事件
+        document.addEventListener('DOMContentLoaded', () => {
+            ['socialSlider', 'wageSlider', 'lifecycleSlider', 'feeSlider', 'mgmtSlider', 'cacSlider'].forEach(id => {
+                document.getElementById(id).addEventListener('input', updateAnalysis);
+            });
+            initFromURL();
+        });
+    </script>
+</body>
+</html>

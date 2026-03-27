@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>城市UE模型对比分析</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #f5f7fa;
+            color: #1a1a2e;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+
+        /* 顶部标题栏 */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .header-left h1 { font-size: 24px; margin-bottom: 4px; }
+        .header-left .subtitle { color: #666; font-size: 14px; }
+        .header-actions { display: flex; gap: 12px; }
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+            text-decoration: none;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(102,126,234,0.3);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(102,126,234,0.4); }
+        .btn-add {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(16,185,129,0.3);
+        }
+        .btn-add:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16,185,129,0.4); }
+        .btn-reset {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(245,158,11,0.3);
+        }
+        .btn-reset:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245,158,11,0.4); }
+        .btn-secondary {
+            background: #fff;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+        .btn-secondary:hover { background: #f8f9ff; transform: translateY(-2px); }
+
+        /* 图例条 */
+        .legend-strip {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .legend-item { display: flex; align-items: center; gap: 8px; font-size: 14px; }
+        .legend-color { width: 20px; height: 4px; border-radius: 2px; }
+        .legend-delete {
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 0 2px;
+            line-height: 1;
+        }
+        .legend-delete:hover { color: #ef4444; }
+
+        /* KPI区 */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .kpi-card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .kpi-label { font-size: 11px; color: #94a3b8; margin-bottom: 4px; }
+        .kpi-value { font-size: 16px; font-weight: 600; }
+
+        /* 参数区 */
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .card { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border-top: 4px solid; }
+        .card-title { font-size: 14px; font-weight: 600; color: #64748b; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .card-delete {
+            background: none;
+            border: none;
+            color: #9ca3af;
+            cursor: pointer;
+            font-size: 20px;
+            padding: 0 4px;
+        }
+        .card-delete:hover { color: #ef4444; }
+        .section-title { font-size: 16px; font-weight: 600; margin: 24px 0 12px 0; padding-bottom: 8px; border-bottom: 2px solid #e2e8f0; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid #f1f5f9; }
+        th { font-weight: 500; color: #94a3b8; font-size: 12px; }
+        td:first-child { color: #475569; }
+        input[type="number"] {
+            width: 80px;
+            padding: 4px 8px;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            font-size: 13px;
+            text-align: right;
+        }
+        input[type="number"]:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 2px rgba(102,126,234,0.1); }
+        .city-name-editable {
+            background: transparent;
+            border: none;
+            border-bottom: 2px dashed #e2e8f0;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a2e;
+            padding: 2px 4px;
+            width: 80px;
+        }
+        .city-name-editable:focus { outline: none; border-bottom-color: #667eea; }
+        .param-label { color: #667eea; font-size: 11px; font-weight: 500; }
+
+        /* 图表区 */
+        .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+        .chart-container { background: #fff; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .chart-title { font-size: 14px; font-weight: 600; margin-bottom: 16px; }
+        .chart-wrapper { position: relative; height: 280px; }
+
+        .formula-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px; margin: 12px 0; font-family: monospace; font-size: 13px; }
+        .result-healthy { color: #22c55e; font-weight: 600; }
+        .result-warn { color: #f59e0b; font-weight: 600; }
+        .result-bad { color: #ef4444; font-weight: 600; }
+
+        @media (max-width: 1024px) {
+            .kpi-grid { grid-template-columns: repeat(4, 1fr); }
+            .chart-grid { grid-template-columns: 1fr; }
+            .header { flex-direction: column; gap: 12px; align-items: flex-start; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 顶部标题栏 -->
+        <div class="header">
+            <div class="header-left">
+                <h1>城市UE模型对比分析</h1>
+                <p class="subtitle">修改参数自动更新所有图表 · 支持多城市动态对比</p>
+            </div>
+            <div class="header-actions">
+                <button class="action-btn btn-add" onclick="addCity()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                    添加城市
+                </button>
+                <button class="action-btn btn-reset" onclick="resetData()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 21H3v-5"/></svg>
+                    重置数据
+                </button>
+                <a class="action-btn btn-primary" href="#" onclick="goSensitivity(); return false;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20V10M18 20V4M6 20v-4"/></svg>
+                    敏感性分析
+                </a>
+            </div>
+        </div>
+
+        <!-- 图例 -->
+        <div class="legend-strip" id="legendStrip"></div>
+
+        <!-- KPI -->
+        <div class="kpi-grid" id="kpiGrid"></div>
+
+        <!-- 参数面板 -->
+        <div class="section-title">一、城市个性化指标（可编辑）</div>
+        <div class="grid" id="revenueCards"></div>
+
+        <div class="section-title">二、变动成本指标（可编辑）</div>
+        <div class="grid" id="varCostCards"></div>
+
+        <div class="section-title">三、固定成本指标</div>
+        <div class="grid" id="fixedCostCards"></div>
+
+        <div class="card" style="margin-bottom:20px;border-top-color:#94a3b8;">
+            <div class="card-title">共用参数</div>
+            <table>
+                <tr><td>社保基数</td><td><input type="number" id="social-base" value="1700" step="100"> 元/月</td></tr>
+            </table>
+        </div>
+
+        <!-- 图表 -->
+        <div class="section-title">四、对比图表</div>
+        <div class="chart-grid">
+            <div class="chart-container">
+                <div class="chart-title">盈亏平衡曲线</div>
+                <div class="chart-wrapper"><canvas id="breakevenChart"></canvas></div>
+            </div>
+            <div class="chart-container">
+                <div class="chart-title">单客月成本构成</div>
+                <div class="chart-wrapper"><canvas id="costChart"></canvas></div>
+            </div>
+        </div>
+        <div class="chart-grid">
+            <div class="chart-container">
+                <div class="chart-title">规模-利润曲线</div>
+                <div class="chart-wrapper"><canvas id="scaleChart"></canvas></div>
+            </div>
+            <div class="chart-container">
+                <div class="chart-title">UE核心指标对比</div>
+                <div class="chart-wrapper"><canvas id="radarChart"></canvas></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ====== 配置 ======
+        const COLORS = ['#1da1f2','#a3e635','#f59e0b','#ef4444','#8b5cf6','#ec4899','#06b6d4','#84cc16'];
+        const STORAGE_KEY = 'cityUEData_v3';
+        let charts = {};
+        let cityIdCounter = 0;
+
+        // ====== 初始城市数据 ======
+        const DEFAULT_CITIES = [
+            { id: 'c0', name: '苏州', color: COLORS[0],
+              fee:40, hours:29.8, workload:208, wage:28, social:15, lifecycle:15, cac:1000, mgmt:35,
+              rent:6000, supervisor:3000, director:3500, device:2000, office:1500, utilities:300 },
+            { id: 'c1', name: '扬州', color: COLORS[1],
+              fee:90, hours:10, workload:120, wage:36, social:30, lifecycle:10, cac:1000, mgmt:35,
+              rent:6000, supervisor:3000, director:3500, device:2000, office:1500, utilities:300 },
+            { id: 'c2', name: '成都', color: COLORS[2],
+              fee:100, hours:5.5, workload:120, wage:40, social:15, lifecycle:10, cac:1000, mgmt:35,
+              rent:6000, supervisor:3000, director:3500, device:2000, office:1500, utilities:300 }
+        ];
+
+        const DEFAULT_CITY_TPL = {
+            fee:90, hours:10, workload:120, wage:36, social:10, lifecycle:10, cac:1000, mgmt:35,
+            rent:6000, supervisor:3000, director:3500, device:2000, office:1500, utilities:300
+        };
+
+        // ====== 持久化 ======
+        function saveData() {
+            const cities = getCitiesFromDOM();
+            const payload = {
+                cities,
+                socialBase: parseFloat(document.getElementById('social-base').value) || 1700,
+                timestamp: new Date().toISOString()
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+        }
+
+        function loadData() {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            if (!raw) return null;
+            try { return JSON.parse(raw); } catch(e) { return null; }
+        }
+
+        // ====== 城市管理 ======
+        let cities = [];
+
+        function getCitiesFromDOM() {
+            return cities.map(city => {
+                const c = { ...city };
+                ['fee','hours','workload','wage','social','lifecycle','cac','mgmt',
+                 'rent','supervisor','director','device','office','utilities'].forEach(f => {
+                    const el = document.getElementById(city.id + '-' + f);
+                    if (el) c[f] = parseFloat(el.value) || 0;
+                });
+                const nameEl = document.getElementById(city.id + '-name');
+                if (nameEl) c.name = nameEl.value || city.name;
+                return c;
+            });
+        }
+
+        function addCity() {
+            if (cities.length >= 8) { alert('最多支持8个城市对比'); return; }
+            const inputName = prompt('请输入城市名称（如"兴化"、"泰兴"）：', '');
+            if (inputName === null) return; // 点取消则不添加
+            const cityName = inputName.trim() || ('城市' + (cities.length + 1));
+            const newCity = {
+                ...DEFAULT_CITY_TPL,
+                id: 'c' + (cityIdCounter++),
+                name: cityName,
+                color: COLORS[cities.length % COLORS.length]
+            };
+            cities.push(newCity);
+            renderAll();
+        }
+
+        function deleteCity(id) {
+            if (cities.length <= 2) { alert('至少保留2个城市'); return; }
+            const idx = cities.findIndex(c => c.id === id);
+            if (idx < 2) { alert('苏州和扬州是基准城市，不能删除'); return; }
+            // 先同步DOM数据再删
+            const latest = getCitiesFromDOM();
+            cities = latest.filter(c => c.id !== id);
+            renderAll();
+        }
+
+        function resetData() {
+            if (!confirm('确定要重置为默认数据吗？这将清除所有自定义设置。')) return;
+            localStorage.removeItem(STORAGE_KEY);
+            cities = JSON.parse(JSON.stringify(DEFAULT_CITIES));
+            cityIdCounter = cities.length;
+            document.getElementById('social-base').value = 1700;
+            renderAll();
+        }
+
+        // ====== 渲染函数 ======
+
+        function renderLegend() {
+            const strip = document.getElementById('legendStrip');
+            strip.innerHTML = cities.map(city => `
+                <div class="legend-item">
+                    <div class="legend-color" style="background:${city.color}"></div>
+                    <input type="text" class="city-name-editable" id="${city.id}-name"
+                        value="${city.name}" oninput="onNameChange('${city.id}')">
+                    ${cities.length > 2 && cities.indexOf(city) >= 2
+                        ? `<button class="legend-delete" onclick="deleteCity('${city.id}')" title="删除">×</button>`
+                        : ''}
+                </div>
+            `).join('');
+        }
+
+        function renderKPI(results) {
+            const kpiDefs = [
+                { label:'单客月收入', key:'revenue', fmt: v=>'¥'+Math.round(v).toLocaleString() },
+                { label:'单客月边际贡献', key:'profit', fmt: v=>'¥'+Math.round(v) },
+                { label:'单客边际贡献率', key:'margin', fmt: v=>Math.round(v)+'%' },
+                { label:'LTV（边际贡献口径）', key:'ltv', fmt: v=>'¥'+Math.round(v).toLocaleString() },
+                { label:'LTV/CAC', key:'ltvCac', fmt: v=>v.toFixed(2)+'x' },
+                { label:'盈亏平衡', key:'breakeven', fmt: v=>v+'人' },
+                { label:'单护理员服务客户数', key:'ratio', fmt: v=>Math.round(v)+'人' }
+            ];
+            const grid = document.getElementById('kpiGrid');
+            grid.innerHTML = kpiDefs.map(def => `
+                <div class="kpi-card">
+                    <div class="kpi-label">${def.label}</div>
+                    ${results.map(r => `
+                        <div class="kpi-value" style="color:${r.city.color};font-size:14px;">
+                            ${r.city.name}: ${def.fmt(r.ue[def.key])}
+                        </div>
+                    `).join('')}
+                </div>
+            `).join('');
+        }
+
+        function renderParamCards() {
+            // 收入侧
+            document.getElementById('revenueCards').innerHTML = cities.map(city => `
+                <div class="card" style="border-top-color:${city.color}">
+                    <div class="card-title">
+                        <span style="color:${city.color}">${city.name} · 收入侧</span>
+                        ${cities.indexOf(city) >= 2 ? `<button class="card-delete" onclick="deleteCity('${city.id}')" title="删除城市">×</button>` : ''}
+                    </div>
+                    <table>
+                        <tr><td>长护险费率</td><td><input type="number" id="${city.id}-fee" value="${city.fee}" step="1"> 元/时</td><td class="param-label">个性化</td></tr>
+                        <tr><td>月服务时长</td><td><input type="number" id="${city.id}-hours" value="${city.hours}" step="0.1"> 小时/月</td><td class="param-label">个性化</td></tr>
+                        <tr><td>护理员工时/月</td><td><input type="number" id="${city.id}-workload" value="${city.workload}" step="1"> 小时/月</td><td class="param-label">个性化</td></tr>
+                        <tr style="background:#f8fafc;">
+                            <td><strong>↳ 单护理员服务客户数</strong></td>
+                            <td><strong id="${city.id}-ratio-display" style="color:${city.color};font-size:15px;">—</strong> 人</td>
+                            <td class="param-label">自动计算</td>
+                        </tr>
+                    </table>
+                </div>
+            `).join('');
+
+            // 变动成本侧
+            document.getElementById('varCostCards').innerHTML = cities.map(city => `
+                <div class="card" style="border-top-color:${city.color}">
+                    <div class="card-title" style="color:${city.color}">${city.name} · 变动成本</div>
+                    <table>
+                        <tr><td>护理员工资</td><td><input type="number" id="${city.id}-wage" value="${city.wage}" step="1"> 元/时</td><td class="param-label">个性化</td></tr>
+                        <tr><td>社保合规比例</td><td><input type="number" id="${city.id}-social" value="${city.social}" step="1"> %</td><td class="param-label">个性化</td></tr>
+                        <tr><td>客户生命周期</td><td><input type="number" id="${city.id}-lifecycle" value="${city.lifecycle}" step="1"> 个月</td><td class="param-label">个性化</td></tr>
+                        <tr><td>获客成本</td><td><input type="number" id="${city.id}-cac" value="${city.cac}" step="100"> 元/人</td><td class="param-label">个性化</td></tr>
+                        <tr><td>管理绩效</td><td><input type="number" id="${city.id}-mgmt" value="${city.mgmt}" step="1"> 元/客户/月</td><td class="param-label">个性化</td></tr>
+                    </table>
+                </div>
+            `).join('');
+
+            // 固定成本侧
+            document.getElementById('fixedCostCards').innerHTML = cities.map(city => `
+                <div class="card" style="border-top-color:${city.color}">
+                    <div class="card-title" style="color:${city.color}">${city.name} · 固定成本</div>
+                    <table>
+                        <tr><td>房租</td><td><input type="number" id="${city.id}-rent" value="${city.rent}" step="500"> 元/月</td></tr>
+                        <tr><td>站长工资</td><td><input type="number" id="${city.id}-supervisor" value="${city.supervisor}" step="100"> 元/月</td></tr>
+                        <tr><td>主任工资</td><td><input type="number" id="${city.id}-director" value="${city.director}" step="100"> 元/月</td></tr>
+                        <tr><td>记录仪</td><td><input type="number" id="${city.id}-device" value="${city.device}" step="100"> 元/月</td></tr>
+                        <tr><td>办公费用</td><td><input type="number" id="${city.id}-office" value="${city.office}" step="100"> 元/月</td></tr>
+                        <tr><td>水电费</td><td><input type="number" id="${city.id}-utilities" value="${city.utilities}" step="50"> 元/月</td></tr>
+                    </table>
+                </div>
+            `).join('');
+        }
+
+        function renderAll() {
+            renderLegend();
+            renderParamCards();
+            // 重新绑定输入事件（因为DOM重建了）
+            bindInputEvents();
+            updateAll();
+        }
+
+        function bindInputEvents() {
+            document.querySelectorAll('input[type="number"]').forEach(inp => {
+                inp.removeEventListener('input', updateAll);
+                inp.addEventListener('input', updateAll);
+            });
+        }
+
+        function onNameChange(id) {
+            const nameEl = document.getElementById(id + '-name');
+            if (!nameEl) return;
+            const city = cities.find(c => c.id === id);
+            if (city) city.name = nameEl.value || city.name;
+            saveData();
+            // 只更新图表标签，不重渲染DOM
+            updateAll();
+        }
+
+        // ====== UE计算 ======
+        function calcUE(city, socialBase) {
+            const fee = city.fee || 90;
+            const hours = city.hours || 10;
+            const workload = city.workload || 120;
+            const wage = city.wage || 36;
+            const social = (city.social || 10) / 100;
+            const lifecycle = city.lifecycle || 10;
+            const cac = city.cac || 1000;
+            const mgmt = city.mgmt || 35;
+            const rent = city.rent || 6000;
+            const supervisor = city.supervisor || 3000;
+            const director = city.director || 3500;
+            const device = city.device || 2000;
+            const office = city.office || 1500;
+            const utilities = city.utilities || 300;
+            const base = socialBase || 1700;
+
+            const ratio = workload / Math.max(hours, 0.1);
+            const socialPer = (base * social) / ratio;
+            const marketing = cac / Math.max(lifecycle, 1);
+            const revenue = fee * hours;
+            const wageCost = wage * hours;
+            const totalCost = wageCost + socialPer + mgmt + marketing;
+            const profit = revenue - totalCost;
+            const margin = revenue > 0 ? profit / revenue * 100 : 0;
+            const fixedCost = rent + supervisor + 1700 + director + 1700 + device + office + utilities;
+
+            return {
+                revenue, wageCost, socialPer, mgmt, marketing, totalCost, profit, margin,
+                ltv: profit * lifecycle,
+                ltvCac: (profit * lifecycle) / Math.max(cac, 1),
+                breakeven: Math.ceil(fixedCost / Math.max(profit, 1)),
+                fixedCost, ratio
+            };
+        }
+
+        // ====== updateAll ======
+        function updateAll() {
+            // 同步DOM数据到cities数组
+            cities.forEach(city => {
+                ['fee','hours','workload','wage','social','lifecycle','cac','mgmt',
+                 'rent','supervisor','director','device','office','utilities'].forEach(f => {
+                    const el = document.getElementById(city.id + '-' + f);
+                    if (el) city[f] = parseFloat(el.value) || 0;
+                });
+                const nameEl = document.getElementById(city.id + '-name');
+                if (nameEl && nameEl.value) city.name = nameEl.value;
+            });
+
+            saveData();
+
+            const socialBase = parseFloat(document.getElementById('social-base').value) || 1700;
+            const results = cities.map(city => ({ city, ue: calcUE(city, socialBase) }));
+
+            // 更新单护理员服务客户数展示
+            results.forEach(r => {
+                const el = document.getElementById(r.city.id + '-ratio-display');
+                if (el) el.textContent = Math.round(r.ue.ratio);
+            });
+
+            renderKPI(results);
+            updateCharts(results);
+        }
+
+        // ====== 图表 ======
+        function initCharts() {
+            // 图表由 updateCharts 负责创建（支持动态城市数量），这里不再单独初始化
+            const socialBase = parseFloat(document.getElementById('social-base').value) || 1700;
+            const results = cities.map(city => ({ city, ue: calcUE(city, socialBase) }));
+            updateCharts(results);
+        }
+
+        // 重建单个图表（解决datasets数量变化时不更新的问题）
+        function rebuildChart(chartKey, canvasId, config) {
+            if (charts[chartKey]) {
+                charts[chartKey].destroy();
+                charts[chartKey] = null;
+            }
+            charts[chartKey] = new Chart(document.getElementById(canvasId), config);
+        }
+
+        function updateCharts(results) {
+            const xLabels = [30,40,50,60,70,80,90,100,110,120,130,140,150];
+            const commonOpts = {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: 'top', labels: { usePointStyle: true } } }
+            };
+
+            // 盈亏平衡 — 重建
+            const beDatasets = results.map(r => ({
+                label: r.city.name,
+                borderColor: r.city.color,
+                backgroundColor: r.city.color + '22',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.1,
+                pointRadius: 4,
+                data: xLabels.map(c => c * r.ue.profit - r.ue.fixedCost)
+            }));
+            beDatasets.push({
+                label: '盈亏平衡线',
+                borderColor: '#ef4444',
+                borderWidth: 2,
+                borderDash: [5,5],
+                fill: false,
+                pointRadius: 0,
+                data: xLabels.map(() => 0)
+            });
+            rebuildChart('breakeven', 'breakevenChart', {
+                type: 'line',
+                data: { labels: xLabels, datasets: beDatasets },
+                options: { ...commonOpts, scales: { y: { title:{display:true,text:'月利润（元）'}, grid:{color:'#f1f5f9'} }, x: { title:{display:true,text:'客户数'}, grid:{color:'#f1f5f9'} } } }
+            });
+
+            // 成本 — 重建
+            rebuildChart('cost', 'costChart', {
+                type: 'bar',
+                data: {
+                    labels: ['护理员工资','社保均摊','管理绩效','营销摊销'],
+                    datasets: results.map(r => ({
+                        label: r.city.name,
+                        data: [r.ue.wageCost, r.ue.socialPer, r.ue.mgmt, r.ue.marketing],
+                        backgroundColor: r.city.color,
+                        borderRadius: 4
+                    }))
+                },
+                options: { ...commonOpts, scales: { y: { title:{display:true,text:'元/客户/月'}, grid:{color:'#f1f5f9'}, beginAtZero:true }, x: { grid:{display:false} } } }
+            });
+
+            // 规模利润 — 重建
+            rebuildChart('scale', 'scaleChart', {
+                type: 'bar',
+                data: {
+                    labels: xLabels,
+                    datasets: results.map(r => ({
+                        label: r.city.name,
+                        data: xLabels.map(c => c * r.ue.profit - r.ue.fixedCost),
+                        backgroundColor: r.city.color,
+                        borderRadius: 4
+                    }))
+                },
+                options: { ...commonOpts, scales: { y: { title:{display:true,text:'月利润（元）'}, grid:{color:'#f1f5f9'} }, x: { title:{display:true,text:'客户数'}, grid:{display:false} } } }
+            });
+
+            // 雷达 — 重建
+            const maxRev = Math.max(...results.map(x=>x.ue.revenue), 1);
+            const maxProfit = Math.max(...results.map(x=>Math.abs(x.ue.profit)), 1);
+            const maxLtvCac = Math.max(...results.map(x=>x.ue.ltvCac), 1);
+            rebuildChart('radar', 'radarChart', {
+                type: 'radar',
+                data: {
+                    labels: ['月收入','月边际贡献','单客边际贡献率','LTV/CAC','盈利门槛(反向)'],
+                    datasets: results.map(r => ({
+                        label: r.city.name,
+                        data: [
+                            r.ue.revenue / maxRev * 100,
+                            r.ue.profit / maxProfit * 100,
+                            r.ue.margin,
+                            r.ue.ltvCac / maxLtvCac * 100,
+                            Math.max(0, (1 - r.ue.breakeven / 200) * 100)
+                        ],
+                        borderColor: r.city.color,
+                        backgroundColor: r.city.color + '28',
+                        borderWidth: 2,
+                        pointBackgroundColor: r.city.color,
+                        pointRadius: 4
+                    }))
+                },
+                options: {
+                    ...commonOpts,
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { display: false },
+                            grid: { color: '#e2e8f0' },
+                            pointLabels: { font: { size: 12 } }
+                        }
+                    }
+                }
+            });
+        }
+
+        // ====== 敏感性分析跳转 ======
+        function goSensitivity() {
+            const socialBase = parseFloat(document.getElementById('social-base').value) || 1700;
+            const data = {};
+            cities.forEach(city => {
+                const ue = calcUE(city, socialBase);
+                data[city.id] = {
+                    name: city.name,
+                    color: city.color,
+                    fee: city.fee,
+                    hours: city.hours,
+                    workload: city.workload,
+                    wage: city.wage,
+                    social: city.social / 100,
+                    lifecycle: city.lifecycle,
+                    cac: city.cac,
+                    mgmt: city.mgmt,
+                    fixedCost: ue.fixedCost,
+                    socialBase: socialBase
+                };
+            });
+            const encoded = encodeURIComponent(JSON.stringify(data));
+            window.open('敏感性分析工具.html?data=' + encoded, '_blank');
+        }
+
+        // ====== 初始化 ======
+        document.addEventListener('DOMContentLoaded', () => {
+            // 尝试从localStorage恢复
+            const saved = loadData();
+            if (saved && saved.cities && saved.cities.length >= 2) {
+                cities = saved.cities;
+                cityIdCounter = cities.length;
+                // 恢复社保基数
+                if (saved.socialBase) {
+                    document.getElementById('social-base').value = saved.socialBase;
+                }
+            } else {
+                // 使用默认数据
+                cities = JSON.parse(JSON.stringify(DEFAULT_CITIES));
+                cityIdCounter = cities.length;
+            }
+
+            renderAll();
+
+            // 社保基数变化
+            document.getElementById('social-base').addEventListener('input', updateAll);
+        });
+    </script>
+</body>
+</html>
