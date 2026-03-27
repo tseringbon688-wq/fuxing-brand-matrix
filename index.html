@@ -1,0 +1,1881 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>福星医养集团 · 品牌矩阵</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+        .header .tagline {
+            font-size: 1.2em;
+            opacity: 0.95;
+            margin-bottom: 20px;
+        }
+        .header .stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        .stat-item {
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+        }
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        .business-section {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid #f0f0f0;
+        }
+        .section-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5em;
+            margin-right: 15px;
+        }
+        .section-title {
+            flex: 1;
+        }
+        .section-title h2 {
+            font-size: 1.4em;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .section-title .brand {
+            font-size: 0.9em;
+            color: #666;
+        }
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+        }
+        .product-card {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 4px solid;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .product-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+        .product-name {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 8px;
+            color: #333;
+        }
+        .product-target {
+            font-size: 0.9em;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        .product-feature {
+            font-size: 0.85em;
+            color: #888;
+            line-height: 1.5;
+        }
+        /* 业务板块颜色 */
+        .institution .section-icon { background: #e3f2fd; }
+        .institution .product-card { border-left-color: #2196f3; }
+        .home .section-icon { background: #e8f5e9; }
+        .home .product-card { border-left-color: #4caf50; }
+        .community .section-icon { background: #fff3e0; }
+        .community .product-card { border-left-color: #ff9800; }
+        .supply .section-icon { background: #fce4ec; }
+        .supply .product-card { border-left-color: #e91e63; }
+        .elderly .section-icon { background: #f3e5f5; }
+        .elderly .product-card { border-left-color: #9c27b0; }
+        .other .section-icon { background: #e0f2f1; }
+        .other .product-card { border-left-color: #009688; }
+        
+        .architecture {
+            background: linear-gradient(135deg, #1a237e 0%, #3949ab 100%);
+            color: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin-top: 30px;
+        }
+        .architecture h2 {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 1.5em;
+        }
+        .arch-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        .arch-item {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+        .arch-item h4 {
+            margin-bottom: 8px;
+            font-size: 1em;
+        }
+        .arch-item p {
+            font-size: 0.85em;
+            opacity: 0.9;
+        }
+        .footer {
+            text-align: center;
+            color: white;
+            margin-top: 40px;
+            opacity: 0.8;
+            font-size: 0.9em;
+        }
+
+        /* ===== 工具栏系统 ===== */
+        .product-card { position: relative; }
+
+        .tool-bar {
+            margin-top: 14px;
+            border-top: 1px solid #eef0f3;
+            padding-top: 10px;
+        }
+        .tool-bar-primary {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        /* UE模型主按钮 */
+        .tool-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 13px;
+            border-radius: 20px;
+            font-size: 0.76em;
+            font-weight: 600;
+            text-decoration: none;
+            border: none;
+            transition: all 0.2s;
+            line-height: 1.5;
+            white-space: nowrap;
+        }
+        .tool-btn.active {
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            box-shadow: 0 2px 8px rgba(79,70,229,0.35);
+            cursor: pointer;
+        }
+        .tool-btn.active:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(79,70,229,0.5);
+        }
+        .tool-btn.locked {
+            background: #f1f5f9;
+            color: #94a3b8;
+            border: 1px dashed #cbd5e1;
+            cursor: default;
+        }
+        /* 更多工具展开按钮 */
+        .tool-toggle {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.74em;
+            font-weight: 500;
+            color: #64748b;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-left: auto;
+        }
+        .tool-toggle:hover {
+            background: #f1f5f9;
+            color: #475569;
+        }
+        .tool-toggle .arrow {
+            transition: transform 0.2s;
+            font-style: normal;
+            font-size: 0.85em;
+        }
+        .tool-toggle.open .arrow { transform: rotate(180deg); }
+
+        /* 展开的工具列表 */
+        .tool-drawer {
+            display: none;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px dashed #e9ecef;
+        }
+        .tool-drawer.open { display: flex; }
+        .tool-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 16px;
+            font-size: 0.73em;
+            font-weight: 500;
+            background: #f1f5f9;
+            color: #94a3b8;
+            border: 1px dashed #cbd5e1;
+            cursor: default;
+            white-space: nowrap;
+        }
+        .tool-item-icon { font-size: 0.9em; }
+
+        /* ===== 业务分布按钮 ===== */
+        .btn-distribution {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 10px;
+            border-radius: 16px;
+            font-size: 0.73em;
+            font-weight: 500;
+            color: #64748b;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-distribution:hover {
+            background: #f1f5f9;
+            color: #475569;
+        }
+
+        /* ===== 业务分布模态框 ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: white;
+            border-radius: 16px;
+            max-width: 900px;
+            width: 100%;
+            max-height: 80vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+        .modal-header {
+            padding: 20px 25px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f9fafb;
+            border-radius: 16px 16px 0 0;
+        }
+        .modal-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #1f2937;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #9ca3af;
+            padding: 5px;
+            transition: color 0.2s;
+        }
+        .modal-close:hover { color: #374151; }
+        .modal-body {
+            padding: 25px;
+            overflow-y: auto;
+            flex: 1;
+        }
+        .legend {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            font-size: 0.9em;
+            color: #6b7280;
+            flex-wrap: wrap;
+        }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .legend-symbol { font-weight: bold; font-size: 1.1em; }
+        .filter-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        .total-summary {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .total-card {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 20px;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        .total-label {
+            font-size: 0.95em;
+            opacity: 0.9;
+        }
+        .total-value {
+            font-size: 1.5em;
+            font-weight: 700;
+            min-width: 60px;
+            text-align: center;
+        }
+        .total-unit {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        .filter-btn {
+            padding: 6px 16px;
+            border-radius: 20px;
+            border: 1px solid #e5e7eb;
+            background: white;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.2s;
+        }
+        .filter-btn:hover { background: #f9fafb; }
+        .filter-btn.active {
+            background: #4f46e5;
+            color: white;
+            border-color: #4f46e5;
+        }
+        .city-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9em;
+        }
+        .city-table th {
+            background: #f9fafb;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 2px solid #e5e7eb;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .city-table td {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+            color: #4b5563;
+        }
+        .city-table tr:hover { background: #f9fafb; }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85em;
+            font-weight: 600;
+        }
+        .status-active {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .status-expanding {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #9ca3af;
+        }
+        .empty-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+        }
+        
+        /* ===== 视图切换按钮 ===== */
+        .view-toggle {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e5e7eb;
+            padding-bottom: 15px;
+        }
+        .view-btn {
+            padding: 8px 20px;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            background: white;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .view-btn:hover {
+            background: #f9fafb;
+            border-color: #d1d5db;
+        }
+        .view-btn.active {
+            background: #4f46e5;
+            color: white;
+            border-color: #4f46e5;
+        }
+
+        /* ===== 省份视图样式 ===== */
+        .province-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        .province-card {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .province-card:hover {
+            background: #f1f5f9;
+            border-color: #4f46e5;
+            transform: translateY(-2px);
+        }
+        .province-name {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+        .province-count {
+            font-size: 0.9em;
+            color: #64748b;
+        }
+
+        /* ===== 城市/区县视图样式 ===== */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 15px;
+            font-size: 0.95em;
+        }
+        .breadcrumb-item {
+            color: #4f46e5;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .breadcrumb-item:hover {
+            text-decoration: underline;
+        }
+        .breadcrumb-separator {
+            color: #94a3b8;
+        }
+        .breadcrumb-current {
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .location-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 12px;
+        }
+        .locations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 12px;
+        }
+        .location-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .location-card:hover {
+            border-color: #4f46e5;
+            box-shadow: 0 2px 8px rgba(79,70,229,0.1);
+            transform: translateY(-2px);
+        }
+        .location-card.expandable::after {
+            content: "▶";
+            float: right;
+            color: #4f46e5;
+            font-size: 0.8em;
+            margin-top: 4px;
+        }
+        .location-name {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+        .location-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        .badge-active {
+            background: #dcfce7;
+            color: #16a34a;
+        }
+        .badge-expanding {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+        .location-status {
+            font-size: 0.85em;
+        }
+
+        /* 图例样式 */
+        .legend-dot {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+        .dot-active {
+            background: #16a34a;
+        }
+        .dot-expanding {
+            background: #2563eb;
+        }
+
+        /* 两级展示样式 */
+        .city-groups {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .province-groups {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .province-group-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 16px;
+        }
+        .province-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f3f4f6;
+            margin-bottom: 12px;
+        }
+        .province-name {
+            font-weight: 600;
+            font-size: 1.1em;
+            color: #1e293b;
+        }
+        .city-count {
+            font-size: 0.85em;
+            color: #6b7280;
+            background: #f3f4f6;
+            padding: 4px 10px;
+            border-radius: 12px;
+        }
+        .city-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 8px;
+        }
+        .city-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: #f9fafb;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        .city-item:hover {
+            background: #f3f4f6;
+        }
+        .city-group-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 16px;
+        }
+        .city-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f3f4f6;
+            margin-bottom: 12px;
+        }
+        .city-name {
+            font-weight: 600;
+            font-size: 1.05em;
+            color: #1e293b;
+        }
+        .city-total {
+            font-size: 0.85em;
+            color: #059669;
+            background: #d1fae5;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        .district-count {
+            font-size: 0.85em;
+            color: #6b7280;
+            background: #f3f4f6;
+            padding: 4px 10px;
+            border-radius: 12px;
+        }
+        .district-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 8px;
+        }
+        .district-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background: #f9fafb;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+        .district-item:hover {
+            background: #f3f4f6;
+        }
+        .district-name {
+            font-size: 0.9em;
+            color: #374151;
+        }
+        .status-dot {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+        
+        /* ===== 业务分布图按钮（主页面入口）===== */
+        .btn-map {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            text-decoration: none;
+            border: none;
+            transition: all 0.2s;
+            background: linear-gradient(135deg, #4f46e5, #7c3aed);
+            color: white;
+            box-shadow: 0 2px 8px rgba(79,70,229,0.35);
+            cursor: pointer;
+        }
+        .btn-map:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(79,70,229,0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div style="margin-bottom: 15px;">
+                <button class="btn-map" onclick="window.open(window.location.href.replace(/[^/]*$/, '') + '业务分布图-四级结构版.html?t=' + Date.now(), '_blank')">
+                    🗺️ 业务分布图
+                </button>
+            </div>
+            <h1>福星医养集团</h1>
+            <p class="tagline">城市医养综合连锁服务运营商</p>
+            <p style="opacity: 0.9; margin-bottom: 20px;">以专业护理为基、以服务网络为翼，覆盖全龄全场景养老服务</p>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-number">4,200+</div>
+                    <div class="stat-label">运营床位</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">18</div>
+                    <div class="stat-label">城市覆盖</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">432</div>
+                    <div class="stat-label">居家社区网点</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">16</div>
+                    <div class="stat-label">业务线</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 机构业务 -->
+        <div class="business-section institution">
+            <div class="section-header">
+                <div class="section-icon">🏥</div>
+                <div class="section-title">
+                    <h2>机构业务</h2>
+                    <span class="brand">福星护理品牌</span>
+                </div>
+            </div>
+            <div class="products-grid">
+                <div class="product-card">
+                    <div class="product-name">医保护理院</div>
+                    <div class="product-target">需长期医疗护理的老年患者</div>
+                    <div class="product-feature">纳入医保报销，医疗+护理双支撑</div>
+                    <div class="tool-bar">
+                        <div class="tool-bar-primary">
+                            <span class="tool-btn locked">🔒 UE模型</span>
+                            <button class="btn-distribution" onclick="showDistribution('医保护理院')">📍 业务分布</button>
+                            <button class="tool-toggle" onclick="toggleDrawer(this)">更多工具 <i class="arrow">▼</i></button>
+                        </div>
+                        <div class="tool-drawer">
+                            <span class="tool-item"><span class="tool-item-icon">📊</span>指标库 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">👥</span>人力配比 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">💰</span>薪酬确认函 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">📣</span>营销系统 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">🚀</span>业务扩张 · 待开发</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-name">长护护理院</div>
+                    <div class="product-target">失能失智老人</div>
+                    <div class="product-feature">长护险定点，专业失能照护</div>
+                    <div class="tool-bar">
+                        <div class="tool-bar-primary">
+                            <span class="tool-btn locked">🔒 UE模型</span>
+                            <button class="btn-distribution" onclick="showDistribution('长护护理院')">📍 业务分布</button>
+                            <button class="tool-toggle" onclick="toggleDrawer(this)">更多工具 <i class="arrow">▼</i></button>
+                        </div>
+                        <div class="tool-drawer">
+                            <span class="tool-item"><span class="tool-item-icon">📊</span>指标库 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">👥</span>人力配比 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">💰</span>薪酬确认函 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">📣</span>营销系统 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">🚀</span>业务扩张 · 待开发</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-name">长护公寓</div>
+                    <div class="product-target">轻中度失能老人</div>
+                    <div class="product-feature">公寓式环境+长护险保障，品质化照护</div>
+                    <div class="tool-bar">
+                        <div class="tool-bar-primary">
+                            <span class="tool-btn locked">🔒 UE模型</span>
+                            <button class="btn-distribution" onclick="showDistribution('长护公寓')">📍 业务分布</button>
+                            <button class="tool-toggle" onclick="toggleDrawer(this)">更多工具 <i class="arrow">▼</i></button>
+                        </div>
+                        <div class="tool-drawer">
+                            <span class="tool-item"><span class="tool-item-icon">📊</span>指标库 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">👥</span>人力配比 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">💰</span>薪酬确认函 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">📣</span>营销系统 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">🚀</span>业务扩张 · 待开发</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 居家业务 -->
+        <div class="business-section home">
+            <div class="section-header">
+                <div class="section-icon">🏠</div>
+                <div class="section-title">
+                    <h2>居家业务</h2>
+                    <span class="brand">居家乐 / 好护家 / 好护到家</span>
+                </div>
+            </div>
+            <div class="products-grid">
+                <div class="product-card">
+                    <div class="product-name">政采居家业务 · 居家乐</div>
+                    <div class="product-target">享受政府购买服务的困难老人</div>
+                    <div class="product-feature">政府采购，公益性兜底服务</div>
+                    <div class="tool-bar">
+                        <div class="tool-bar-primary">
+                            <span class="tool-btn locked">🔒 UE模型</span>
+                            <button class="btn-distribution" onclick="showDistribution('政采居家业务')">📍 业务分布</button>
+                            <button class="tool-toggle" onclick="toggleDrawer(this)">更多工具 <i class="arrow">▼</i></button>
+                        </div>
+                        <div class="tool-drawer">
+                            <span class="tool-item"><span class="tool-item-icon">📊</span>指标库 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">👥</span>人力配比 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">💰</span>薪酬确认函 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">📣</span>营销系统 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">🚀</span>业务扩张 · 待开发</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-name">长护险居家业务 · 好护家</div>
+                    <div class="product-target">失能失智老人，长护险参保人</div>
+                    <div class="product-feature">长护险定点，专业居家护理上门</div>
+                    <div class="tool-bar">
+                        <div class="tool-bar-primary">
+                            <a href="城市UE对比分析-增强版.html" class="tool-btn active" target="_blank">📈 UE模型 →</a>
+                            <button class="btn-distribution" onclick="showDistribution('长护险居家业务')">📍 业务分布</button>
+                            <button class="tool-toggle" onclick="toggleDrawer(this)">更多工具 <i class="arrow">▼</i></button>
+                        </div>
+                        <div class="tool-drawer">
+                            <span class="tool-item"><span class="tool-item-icon">📊</span>指标库 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">👥</span>人力配比 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">💰</span>薪酬确认函 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">📣</span>营销系统 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">🚀</span>业务扩张 · 待开发</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-name">自费到家 · 基础版</div>
+                    <div class="product-target">有家政需求的老年家庭</div>
+                    <div class="product-feature">适老家政，灵活按需，对标58同城</div>
+                    <div class="tool-bar">
+                        <div class="tool-bar-primary">
+                            <span class="tool-btn locked">🔒 UE模型</span>
+                            <button class="btn-distribution" onclick="showDistribution('适老家政')">📍 业务分布</button>
+                            <button class="tool-toggle" onclick="toggleDrawer(this)">更多工具 <i class="arrow">▼</i></button>
+                        </div>
+                        <div class="tool-drawer">
+                            <span class="tool-item"><span class="tool-item-icon">📊</span>指标库 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">👥</span>人力配比 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">💰</span>薪酬确认函 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">📣</span>营销系统 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">🚀</span>业务扩张 · 待开发</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-name">自费到家 · 高端版</div>
+                    <div class="product-target">高净值家庭</div>
+                    <div class="product-feature">家庭护理院，对标好慷到家，医护团队上门</div>
+                    <div class="tool-bar">
+                        <div class="tool-bar-primary">
+                            <span class="tool-btn locked">🔒 UE模型</span>
+                            <button class="btn-distribution" onclick="showDistribution('家庭护理院')">📍 业务分布</button>
+                            <button class="tool-toggle" onclick="toggleDrawer(this)">更多工具 <i class="arrow">▼</i></button>
+                        </div>
+                        <div class="tool-drawer">
+                            <span class="tool-item"><span class="tool-item-icon">📊</span>指标库 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">👥</span>人力配比 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">💰</span>薪酬确认函 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">📣</span>营销系统 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">🚀</span>业务扩张 · 待开发</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 社区业务 -->
+        <div class="business-section community">
+            <div class="section-header">
+                <div class="section-icon">🏘️</div>
+                <div class="section-title">
+                    <h2>社区业务</h2>
+                    <span class="brand">居家乐</span>
+                </div>
+            </div>
+            <div class="products-grid">
+                <div class="product-card">
+                    <div class="product-name">社区日间照料综合体</div>
+                    <div class="product-target">日间需照料的老人</div>
+                    <div class="product-feature">含小嵌机构，日托+生活照料一站式</div>
+                    <div class="tool-bar">
+                        <div class="tool-bar-primary">
+                            <span class="tool-btn locked">🔒 UE模型</span>
+                            <button class="btn-distribution" onclick="showDistribution('社区日间照料综合体')">📍 业务分布</button>
+                            <button class="tool-toggle" onclick="toggleDrawer(this)">更多工具 <i class="arrow">▼</i></button>
+                        </div>
+                        <div class="tool-drawer">
+                            <span class="tool-item"><span class="tool-item-icon">📊</span>指标库 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">👥</span>人力配比 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">💰</span>薪酬确认函 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">📣</span>营销系统 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">🚀</span>业务扩张 · 待开发</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-name">社区助餐点</div>
+                    <div class="product-target">社区老年居民</div>
+                    <div class="product-feature">社区堂食，就近便捷，低价惠老</div>
+                    <div class="tool-bar">
+                        <div class="tool-bar-primary">
+                            <span class="tool-btn locked">🔒 UE模型</span>
+                            <button class="btn-distribution" onclick="showDistribution('社区助餐点')">📍 业务分布</button>
+                            <button class="tool-toggle" onclick="toggleDrawer(this)">更多工具 <i class="arrow">▼</i></button>
+                        </div>
+                        <div class="tool-drawer">
+                            <span class="tool-item"><span class="tool-item-icon">📊</span>指标库 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">👥</span>人力配比 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">💰</span>薪酬确认函 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">📣</span>营销系统 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">🚀</span>业务扩张 · 待开发</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-name">社区食堂厨房</div>
+                    <div class="product-target">行动不便的居家老人</div>
+                    <div class="product-feature">热餐配送到家</div>
+                    <div class="tool-bar">
+                        <div class="tool-bar-primary">
+                            <span class="tool-btn locked">🔒 UE模型</span>
+                            <button class="btn-distribution" onclick="showDistribution('社区食堂厨房')">📍 业务分布</button>
+                            <button class="tool-toggle" onclick="toggleDrawer(this)">更多工具 <i class="arrow">▼</i></button>
+                        </div>
+                        <div class="tool-drawer">
+                            <span class="tool-item"><span class="tool-item-icon">📊</span>指标库 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">👥</span>人力配比 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">💰</span>薪酬确认函 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">📣</span>营销系统 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">🚀</span>业务扩张 · 待开发</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 供应链业务 -->
+        <div class="business-section supply">
+            <div class="section-header">
+                <div class="section-icon">📦</div>
+                <div class="section-title">
+                    <h2>供应链业务</h2>
+                    <span class="brand">星链优品品牌</span>
+                </div>
+            </div>
+            <div class="products-grid">
+                <div class="product-card">
+                    <div class="product-name">食材配送业务</div>
+                    <div class="product-target">养老机构、社区食堂、居家老人</div>
+                    <div class="product-feature">标准化食材供应，保障食材新鲜安全、品质稳定</div>
+                    <div class="tool-bar">
+                        <div class="tool-bar-primary">
+                            <span class="tool-btn locked">🔒 UE模型</span>
+                            <button class="btn-distribution" onclick="showDistribution('食材配送业务')">📍 业务分布</button>
+                            <button class="tool-toggle" onclick="toggleDrawer(this)">更多工具 <i class="arrow">▼</i></button>
+                        </div>
+                        <div class="tool-drawer">
+                            <span class="tool-item"><span class="tool-item-icon">📊</span>指标库 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">👥</span>人力配比 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">💰</span>薪酬确认函 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">📣</span>营销系统 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">🚀</span>业务扩张 · 待开发</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-name">星链优品线上商城</div>
+                    <div class="product-target">老年用户及家属</div>
+                    <div class="product-feature">适老化产品电商平台</div>
+                    <div class="tool-bar">
+                        <div class="tool-bar-primary">
+                            <span class="tool-btn locked">🔒 UE模型</span>
+                            <button class="btn-distribution" onclick="showDistribution('星链优品线上商城')">📍 业务分布</button>
+                            <button class="tool-toggle" onclick="toggleDrawer(this)">更多工具 <i class="arrow">▼</i></button>
+                        </div>
+                        <div class="tool-drawer">
+                            <span class="tool-item"><span class="tool-item-icon">📊</span>指标库 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">👥</span>人力配比 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">💰</span>薪酬确认函 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">📣</span>营销系统 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">🚀</span>业务扩张 · 待开发</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-name">福气满满线下集市</div>
+                    <div class="product-target">社区老年居民</div>
+                    <div class="product-feature">线下市集，产品展销+社区互动</div>
+                    <div class="tool-bar">
+                        <div class="tool-bar-primary">
+                            <span class="tool-btn locked">🔒 UE模型</span>
+                            <button class="btn-distribution" onclick="showDistribution('福气满满线下集市')">📍 业务分布</button>
+                            <button class="tool-toggle" onclick="toggleDrawer(this)">更多工具 <i class="arrow">▼</i></button>
+                        </div>
+                        <div class="tool-drawer">
+                            <span class="tool-item"><span class="tool-item-icon">📊</span>指标库 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">👥</span>人力配比 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">💰</span>薪酬确认函 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">📣</span>营销系统 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">🚀</span>业务扩张 · 待开发</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 享老业务 -->
+        <div class="business-section elderly">
+            <div class="section-header">
+                <div class="section-icon">🎨</div>
+                <div class="section-title">
+                    <h2>享老业务</h2>
+                    <span class="brand">山海艺塾品牌</span>
+                </div>
+            </div>
+            <div class="products-grid">
+                <div class="product-card">
+                    <div class="product-name">老年大学业务</div>
+                    <div class="product-target">有学习需求的活力老人</div>
+                    <div class="product-feature">课程多元，艺术/健康/技能兼顾</div>
+                    <div class="tool-bar">
+                        <div class="tool-bar-primary">
+                            <span class="tool-btn locked">🔒 UE模型</span>
+                            <button class="btn-distribution" onclick="showDistribution('老年大学业务')">📍 业务分布</button>
+                            <button class="tool-toggle" onclick="toggleDrawer(this)">更多工具 <i class="arrow">▼</i></button>
+                        </div>
+                        <div class="tool-drawer">
+                            <span class="tool-item"><span class="tool-item-icon">📊</span>指标库 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">👥</span>人力配比 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">💰</span>薪酬确认函 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">📣</span>营销系统 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">🚀</span>业务扩张 · 待开发</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-name">老年旅游业务</div>
+                    <div class="product-target">有出行意愿的活力老人</div>
+                    <div class="product-feature">专为老年人定制，适老化旅游产品</div>
+                    <div class="tool-bar">
+                        <div class="tool-bar-primary">
+                            <span class="tool-btn locked">🔒 UE模型</span>
+                            <button class="btn-distribution" onclick="showDistribution('老年旅游业务')">📍 业务分布</button>
+                            <button class="tool-toggle" onclick="toggleDrawer(this)">更多工具 <i class="arrow">▼</i></button>
+                        </div>
+                        <div class="tool-drawer">
+                            <span class="tool-item"><span class="tool-item-icon">📊</span>指标库 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">👥</span>人力配比 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">💰</span>薪酬确认函 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">📣</span>营销系统 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">🚀</span>业务扩张 · 待开发</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-name">适老直播内容</div>
+                    <div class="product-target">追求精神生活、热爱学习的老年群体</div>
+                    <div class="product-feature">提供教做饭、练太极、养生保健等适老化直播节目，丰富晚年精神生活</div>
+                    <div class="tool-bar">
+                        <div class="tool-bar-primary">
+                            <span class="tool-btn locked">🔒 UE模型</span>
+                            <button class="btn-distribution" onclick="showDistribution('适老直播内容')">📍 业务分布</button>
+                            <button class="tool-toggle" onclick="toggleDrawer(this)">更多工具 <i class="arrow">▼</i></button>
+                        </div>
+                        <div class="tool-drawer">
+                            <span class="tool-item"><span class="tool-item-icon">📊</span>指标库 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">👥</span>人力配比 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">💰</span>薪酬确认函 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">📣</span>营销系统 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">🚀</span>业务扩张 · 待开发</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 其他业务 -->
+        <div class="business-section other">
+            <div class="section-header">
+                <div class="section-icon">🔧</div>
+                <div class="section-title">
+                    <h2>其他业务</h2>
+                    <span class="brand">专业支撑</span>
+                </div>
+            </div>
+            <div class="products-grid">
+                <div class="product-card">
+                    <div class="product-name">小福</div>
+                    <div class="product-target">管理团队、护理人员、老人家属</div>
+                    <div class="product-feature">智慧养老服务平台</div>
+                    <div class="tool-bar">
+                        <div class="tool-bar-primary">
+                            <span class="tool-btn locked">🔒 UE模型</span>
+                            <button class="tool-toggle" onclick="toggleDrawer(this)">更多工具 <i class="arrow">▼</i></button>
+                        </div>
+                        <div class="tool-drawer">
+                            <span class="tool-item"><span class="tool-item-icon">📊</span>指标库 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">👥</span>人力配比 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">💰</span>薪酬确认函 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">📣</span>营销系统 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">🚀</span>业务扩张 · 待开发</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="product-card">
+                    <div class="product-name">苏州话语言大模型</div>
+                    <div class="product-target">苏州本地老年用户</div>
+                    <div class="product-feature">方言交互AI，提升本地老年用户体验</div>
+                    <div class="tool-bar">
+                        <div class="tool-bar-primary">
+                            <span class="tool-btn locked">🔒 UE模型</span>
+                            <button class="tool-toggle" onclick="toggleDrawer(this)">更多工具 <i class="arrow">▼</i></button>
+                        </div>
+                        <div class="tool-drawer">
+                            <span class="tool-item"><span class="tool-item-icon">📊</span>指标库 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">👥</span>人力配比 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">💰</span>薪酬确认函 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">📣</span>营销系统 · 待开发</span>
+                            <span class="tool-item"><span class="tool-item-icon">🚀</span>业务扩张 · 待开发</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 品牌架构 -->
+        <div class="architecture">
+            <h2>品牌架构关系</h2>
+            <div class="arch-grid">
+                <div class="arch-item">
+                    <h4>🏢 母品牌</h4>
+                    <p>福星医养集团<br>集团整体背书，专业性与信任感</p>
+                </div>
+                <div class="arch-item">
+                    <h4>🏥 福星护理</h4>
+                    <p>机构核心品牌<br>最高专业护理能力</p>
+                </div>
+                <div class="arch-item">
+                    <h4>🏠 居家社区矩阵</h4>
+                    <p>居家乐/好护家/好护到家<br>公益+保险+自费三轨并行</p>
+                </div>
+                <div class="arch-item">
+                    <h4>📦 星链优品</h4>
+                    <p>供应链品牌<br>独立市场化，线上线下双渠道</p>
+                </div>
+                <div class="arch-item">
+                    <h4>🎨 山海艺塾</h4>
+                    <p>享老文化品牌<br>活力老人精神文化需求</p>
+                </div>
+                <div class="arch-item">
+                    <h4>🔧 小福科技</h4>
+                    <p>专业支撑<br>智慧系统+苏州话语言大模型</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>福星医养集团 · 城市医养综合连锁服务运营商</p>
+            <p style="margin-top: 10px;">文档生成时间：2026年3月24日 | 制作：服务产品设计Agent·马云 | 修改：薪酬绩效Agent·张勇（2026-03-26）</p>
+        </div>
+    </div>
+
+    <!-- 业务分布模态框 -->
+    <div class="modal-overlay" id="distributionModal">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title" id="modalTitle">业务分布</span>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== 三级联动数据结构（省份→城市→区县） =====
+        const provinceCities = {
+            '江苏': ['苏州市', '徐州市', '扬州市', '无锡市', '镇江市', '淮安市', '连云港市', '泰州市'],
+            '广东': ['广州市', '佛山市', '深圳市', '东莞市', '中山市'],
+            '浙江': ['杭州市', '宁波市', '嘉兴市', '丽水市'],
+            '北京': ['北京市'],
+            '安徽': ['合肥市', '安庆市'],
+            '四川': ['成都市'],
+            '贵州': ['贵阳市']
+        };
+
+        const cityDistricts = {
+            '苏州市': ['常熟市', '姑苏区', '相城区', '工业园区', '吴中区', '高新区', '太仓市', '张家港市', '昆山市'],
+            '扬州市': ['江都区', '高邮市', '邗江区'],
+            '泰州市': ['兴化市', '靖江市', '泰州市区'],
+            '徐州市': ['铜山区', '云龙区', '泉山区', '贾汪区', '鼓楼区', '丰县', '沛县', '睢宁县', '新沂市', '邳州市']
+        };
+
+        // 业务分布数据（来源：待整理-集团业务分布表-已修改-补充区县.xlsx，2026-03-27）
+        // active: 已开展（含地点、数量、类型），expanding: 积极拓展（城市名称列表）
+        // total: 经营单元合计，cityTotals: 各城市经营单元合计
+const businessDistribution = {
+    "医保护理院": {
+        "total": 13,
+        "cityTotals": {"贵阳市": 1, "广州市": 1, "东莞市": 2, "苏州市": 6, "徐州市": 8},
+        "active": [
+            {"location": "贵阳市南明区", "count": 1, "type": "机构"},
+            {"location": "广州市海珠区", "count": 1, "type": "机构"},
+            {"location": "东莞市莞城街道", "count": 1, "type": "机构"},
+            {"location": "东莞市万江街道", "count": 1, "type": "机构"},
+            {"location": "苏州市常熟市", "count": 3, "type": "机构"},
+            {"location": "苏州市姑苏区", "count": 3, "type": "机构"},
+            {"location": "苏州市吴中区", "count": 1, "type": "机构"},
+            {"location": "苏州市高新区", "count": 2, "type": "机构"}
+        ],
+        "expanding": ["佛山市", "深圳市", "中山市", "惠州市", "镇江市", "杭州市", "成都市", "宜宾市", "南充市", "广元市", "绵阳市"]
+    },
+    "长护护理院": {
+        "total": 1,
+        "cityTotals": {"徐州市": 1},
+        "active": [
+            {"location": "徐州市沛县", "count": 1, "type": "机构"}
+        ],
+        "expanding": ["佛山市", "深圳市", "中山市", "惠州市", "镇江市", "杭州市", "成都市", "宜宾市", "南充市", "广元市", "绵阳市"]
+    },
+    "长护公寓": {
+        "total": 1,
+        "cityTotals": {"泰州市": 1},
+        "active": [
+            {"location": "泰州市泰兴", "count": 1, "type": "机构"}
+        ],
+        "expanding": ["佛山市", "深圳市", "中山市", "惠州市", "镇江市", "杭州市", "成都市", "宜宾市", "南充市", "广元市", "绵阳市"]
+    },
+    "政采居家业务": {
+        "total": 55,
+        "cityTotals": {"贵阳市": 1, "徐州市": 5, "淮安市": 1, "连云港市": 4, "苏州市": 32, "扬州市": 3, "泰州市": 8, "北京市": 1},
+        "active": [
+            {"location": "贵阳市南明区", "count": 1, "type": "站点"},
+            {"location": "徐州市沛县", "count": 5, "type": "站点"},
+            {"location": "淮安市经济技术开发区", "count": 1, "type": "站点"},
+            {"location": "连云港市灌云县", "count": 4, "type": "站点"},
+            {"location": "苏州市姑苏区", "count": 11, "type": "站点"},
+            {"location": "苏州市工业园区", "count": 1, "type": "站点"},
+            {"location": "苏州市吴中区", "count": 5, "type": "站点"},
+            {"location": "苏州市高新区", "count": 3, "type": "站点"},
+            {"location": "苏州市太仓市", "count": 12, "type": "站点"},
+            {"location": "扬州市江都区", "count": 3, "type": "站点"},
+            {"location": "泰州市泰兴", "count": 8, "type": "站点"},
+            {"location": "北京市通州区", "count": 1, "type": "站点"}
+        ],
+        "expanding": ["佛山市", "深圳市", "中山市", "惠州市", "镇江市", "杭州市", "成都市", "宜宾市", "南充市", "广元市", "绵阳市"]
+    },
+    "长护险居家业务": {
+        "total": 63,
+        "cityTotals": {"徐州市": 6, "淮安市": 1, "连云港市": 1, "苏州市": 45, "扬州市": 2, "泰州市": 4, "北京市": 1, "嘉兴市": 1, "丽水市": 2},
+        "active": [
+            {"location": "徐州市沛县", "count": 4, "type": "站点"},
+            {"location": "徐州市丰县", "count": 1, "type": "站点"},
+            {"location": "徐州市贾汪区", "count": 1, "type": "站点"},
+            {"location": "淮安市淮安区", "count": 1, "type": "站点"},
+            {"location": "连云港市海州区", "count": 1, "type": "站点"},
+            {"location": "苏州市常熟市", "count": 4, "type": "站点"},
+            {"location": "苏州市姑苏区", "count": 11, "type": "站点"},
+            {"location": "苏州市相城区", "count": 1, "type": "站点"},
+            {"location": "苏州市工业园区", "count": 1, "type": "站点"},
+            {"location": "苏州市吴中区", "count": 17, "type": "站点"},
+            {"location": "苏州市高新区", "count": 1, "type": "站点"},
+            {"location": "苏州市太仓市", "count": 7, "type": "站点"},
+            {"location": "苏州市张家港市", "count": 3, "type": "站点"},
+            {"location": "扬州市江都区", "count": 1, "type": "站点"},
+            {"location": "扬州市高邮市", "count": 1, "type": "站点"},
+            {"location": "泰州市海陵区", "count": 1, "type": "站点"},
+            {"location": "泰州市姜堰区", "count": 1, "type": "站点"},
+            {"location": "泰州市兴化", "count": 1, "type": "站点"},
+            {"location": "泰州市靖江", "count": 1, "type": "站点"},
+            {"location": "北京市石景山区", "count": 1, "type": "站点"},
+            {"location": "嘉兴市嘉善县", "count": 1, "type": "站点"},
+            {"location": "丽水市莲都区", "count": 1, "type": "站点"},
+            {"location": "丽水市缙云县", "count": 1, "type": "站点"}
+        ],
+        "expanding": ["佛山市", "深圳市", "中山市", "惠州市", "镇江市", "杭州市", "成都市", "宜宾市", "南充市", "广元市", "绵阳市"]
+    },
+    "适老家政": {
+        "total": 0,
+        "cityTotals": {},
+        "active": [],
+        "expanding": ["佛山市", "深圳市", "中山市", "惠州市", "镇江市", "杭州市", "成都市", "宜宾市", "南充市", "广元市", "绵阳市"]
+    },
+    "家庭护理院": {
+        "total": 0,
+        "cityTotals": {},
+        "active": [],
+        "expanding": ["佛山市", "深圳市", "中山市", "惠州市", "镇江市", "杭州市", "成都市", "宜宾市", "南充市", "广元市", "绵阳市"]
+    },
+    "社区日间照料综合体": {
+        "total": 214,
+        "cityTotals": {"淮安市": 9, "苏州市": 101, "无锡市": 12, "扬州市": 3, "泰州市": 60, "安庆市": 13, "嘉兴市": 8, "宁波市": 8},
+        "active": [
+            {"location": "淮安市清江浦区", "count": 4, "type": "站点"},
+            {"location": "淮安市经济技术开发区", "count": 5, "type": "站点"},
+            {"location": "苏州市姑苏区", "count": 58, "type": "站点"},
+            {"location": "苏州市工业园区", "count": 10, "type": "站点"},
+            {"location": "苏州市吴中区", "count": 19, "type": "站点"},
+            {"location": "苏州市高新区", "count": 4, "type": "站点"},
+            {"location": "苏州市太仓市", "count": 10, "type": "站点"},
+            {"location": "无锡市惠山区", "count": 12, "type": "站点"},
+            {"location": "扬州市江都区", "count": 3, "type": "站点"},
+            {"location": "泰州市海陵区", "count": 1, "type": "站点"},
+            {"location": "泰州市泰兴", "count": 59, "type": "站点"},
+            {"location": "安庆市经济技术开发区", "count": 13, "type": "站点"},
+            {"location": "嘉兴市秀洲区", "count": 8, "type": "站点"},
+            {"location": "宁波市镇海区", "count": 8, "type": "站点"}
+        ],
+        "expanding": ["佛山市", "深圳市", "中山市", "惠州市", "镇江市", "杭州市", "成都市", "宜宾市", "南充市", "广元市", "绵阳市"]
+    },
+    "社区助餐点": {
+        "total": 75,
+        "cityTotals": {"苏州市": 62, "无锡市": 7, "扬州市": 4, "泰州市": 1, "宁波市": 1},
+        "active": [
+            {"location": "苏州市姑苏区", "count": 49, "type": "站点"},
+            {"location": "苏州市太仓市", "count": 10, "type": "站点"},
+            {"location": "无锡市惠山区", "count": 7, "type": "站点"},
+            {"location": "扬州市江都区", "count": 4, "type": "站点"},
+            {"location": "苏州市高新区", "count": 3, "type": "站点"},
+            {"location": "泰州市泰兴", "count": 1, "type": "站点"},
+            {"location": "宁波市镇海区", "count": 1, "type": "站点"}
+        ],
+        "expanding": ["佛山市", "深圳市", "中山市", "惠州市", "镇江市", "杭州市", "成都市", "宜宾市", "南充市", "广元市", "绵阳市"]
+    },
+    "社区食堂厨房": {
+        "total": 22,
+        "cityTotals": {"苏州市": 9, "无锡市": 7, "扬州市": 4, "泰州市": 1, "宁波市": 1},
+        "active": [
+            {"location": "无锡市惠山区", "count": 7, "type": "站点"},
+            {"location": "苏州市姑苏区", "count": 5, "type": "站点"},
+            {"location": "扬州市江都区", "count": 4, "type": "站点"},
+            {"location": "苏州市高新区", "count": 2, "type": "站点"},
+            {"location": "苏州市吴中区", "count": 1, "type": "站点"},
+            {"location": "苏州市太仓市", "count": 1, "type": "站点"},
+            {"location": "泰州市泰兴", "count": 1, "type": "站点"},
+            {"location": "宁波市镇海区", "count": 1, "type": "站点"}
+        ],
+        "expanding": ["佛山市", "深圳市", "中山市", "惠州市", "镇江市", "杭州市", "成都市", "宜宾市", "南充市", "广元市", "绵阳市"]
+    },
+    "食材配送业务": {
+        "total": 0,
+        "cityTotals": {},
+        "active": [],
+        "expanding": ["佛山市", "深圳市", "中山市", "惠州市", "镇江市", "杭州市", "成都市", "宜宾市", "南充市", "广元市", "绵阳市"]
+    },
+    "星链优品线上商城": {
+        "total": 0,
+        "cityTotals": {},
+        "active": [],
+        "expanding": ["佛山市", "深圳市", "中山市", "惠州市", "镇江市", "杭州市", "成都市", "宜宾市", "南充市", "广元市", "绵阳市"]
+    },
+    "福气满满线下集市": {
+        "total": 0,
+        "cityTotals": {},
+        "active": [],
+        "expanding": ["佛山市", "深圳市", "中山市", "惠州市", "镇江市", "杭州市", "成都市", "宜宾市", "南充市", "广元市", "绵阳市"]
+    },
+    "老年大学业务": {
+        "total": 0,
+        "cityTotals": {},
+        "active": [],
+        "expanding": ["佛山市", "深圳市", "中山市", "惠州市", "镇江市", "杭州市", "成都市", "宜宾市", "南充市", "广元市", "绵阳市"]
+    },
+    "老年旅游业务": {
+        "total": 0,
+        "cityTotals": {},
+        "active": [],
+        "expanding": ["佛山市", "深圳市", "中山市", "惠州市", "镇江市", "杭州市", "成都市", "宜宾市", "南充市", "广元市", "绵阳市"]
+    },
+    "适老直播内容": {
+        "total": 0,
+        "cityTotals": {},
+        "active": [],
+        "expanding": ["佛山市", "深圳市", "中山市", "惠州市", "镇江市", "杭州市", "成都市", "宜宾市", "南充市", "广元市", "绵阳市"]
+    }
+};
+        // 所有业务线列表
+        const allBusinessLines = [
+            "医保护理院", "长护护理院", "长护公寓",
+            "政采居家业务", "长护险居家业务", "适老家政", "家庭护理院",
+            "社区日间照料综合体", "社区助餐点", "社区食堂厨房",
+            "食材配送业务", "星链优品线上商城", "福气满满线下集市",
+            "老年大学业务", "老年旅游业务", "适老直播内容"
+        ];
+
+        let currentBusiness = '';
+        let currentFilter = 'all';
+        let currentView = 'province'; // 'province' | 'city' | 'district'
+        let currentProvince = null;
+        let currentCity = null;
+
+        function toggleDrawer(btn) {
+            const primary = btn.closest('.tool-bar-primary');
+            const drawer = primary.nextElementSibling;
+            const isOpen = drawer.classList.contains('open');
+            drawer.classList.toggle('open', !isOpen);
+            btn.classList.toggle('open', !isOpen);
+        }
+
+        function showDistribution(businessName) {
+            currentBusiness = businessName;
+            currentFilter = 'active';
+            currentView = 'city';
+            currentProvince = null;
+            currentCity = null;
+
+            // 调试信息
+            console.log('当前业务:', currentBusiness);
+            console.log('业务数据:', businessDistribution[currentBusiness]);
+
+            // 更新标题
+            document.getElementById('modalTitle').textContent = businessName + ' · 业务分布';
+
+            // 先渲染数据（生成筛选按钮）
+            renderView();
+
+            // 再设置筛选按钮的active状态
+            const filterBtn = document.querySelector('.filter-btn[onclick="filterCities(\'active\')"]');
+            if (filterBtn) {
+                document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+                filterBtn.classList.add('active');
+            }
+
+            // 显示模态框
+            document.getElementById('distributionModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('distributionModal').classList.remove('active');
+        }
+
+        function filterCities(filter) {
+            currentFilter = filter;
+
+            // 更新按钮状态
+            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            const targetBtn = document.querySelector(`.filter-btn[onclick="filterCities('${filter}')"]`);
+            if (targetBtn) targetBtn.classList.add('active');
+
+            // 重新渲染
+            renderView();
+        }
+
+        // ===== 视图切换逻辑 =====
+        function renderView() {
+            const modalBody = document.getElementById('modalBody');
+            const businessData = businessDistribution[currentBusiness] || { "active": [], "expanding": [] };
+
+            console.log('renderView - currentBusiness:', currentBusiness);
+            console.log('renderView - businessData:', businessData);
+            console.log('renderView - currentFilter:', currentFilter);
+
+            // 根据筛选条件获取数据
+            if (currentFilter === 'active') {
+                const activeData = businessData['active'] || [];
+                renderCityViewSimple(activeData, true);
+            } else if (currentFilter === 'expanding') {
+                const expandingData = businessData['expanding'] || [];
+                renderCityViewSimple(expandingData, false);
+            }
+        }
+
+        // ===== 简化版城市视图（两级展示：城市→区县） =====
+        function renderCityViewSimple(data, isActive) {
+            const modalBody = document.getElementById('modalBody');
+
+            // 空数据处理
+            if (!data || data.length === 0) {
+                modalBody.innerHTML = `
+                    <div class="legend">
+                        <div class="legend-item"><span class="legend-dot dot-active"></span> 已开展</div>
+                        <div class="legend-item"><span class="legend-dot dot-expanding"></span> 积极拓展</div>
+                    </div>
+                    <div class="filter-bar" id="filterBar">
+                        <button class="filter-btn ${currentFilter === 'active' ? 'active' : ''}" onclick="filterCities('active')">已开展</button>
+                        <button class="filter-btn ${currentFilter === 'expanding' ? 'active' : ''}" onclick="filterCities('expanding')">积极拓展</button>
+                    </div>
+                    <div class="empty-state">
+                        <div class="empty-icon">📋</div>
+                        <p>暂无相关数据</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // 积极拓展：按省份分组，显示省份→城市两级
+            if (!isActive) {
+                const provinceGroups = {};
+                data.forEach(city => {
+                    const province = getProvinceByCity(city);
+                    if (province) {
+                        if (!provinceGroups[province]) {
+                            provinceGroups[province] = [];
+                        }
+                        provinceGroups[province].push(city);
+                    }
+                });
+
+                modalBody.innerHTML = `
+                    <div class="legend">
+                        <div class="legend-item"><span class="legend-dot dot-active"></span> 已开展</div>
+                        <div class="legend-item"><span class="legend-dot dot-expanding"></span> 积极拓展</div>
+                    </div>
+                    <div class="filter-bar" id="filterBar">
+                        <button class="filter-btn ${currentFilter === 'active' ? 'active' : ''}" onclick="filterCities('active')">已开展</button>
+                        <button class="filter-btn ${currentFilter === 'expanding' ? 'active' : ''}" onclick="filterCities('expanding')">积极拓展</button>
+                    </div>
+                    <div class="province-groups">
+                        ${Object.entries(provinceGroups).map(([province, cityList]) => `
+                            <div class="province-group-card">
+                                <div class="province-header">
+                                    <span class="province-name">${province}</span>
+                                    <span class="city-count">${cityList.length}个城市</span>
+                                </div>
+                                <div class="city-list">
+                                    ${cityList.map(city => `
+                                        <div class="city-item">
+                                            <span class="city-name">${city}</span>
+                                            <span class="status-dot dot-expanding"></span>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                return;
+            }
+
+            // 已开展：按城市分组，展开显示区县（含数量和类型）
+            const cityGroups = {};
+            data.forEach(item => {
+                const location = item.location || item;
+                let cityName = location;
+                let districtName = '';
+
+                for (let i = 0; i < location.length; i++) {
+                    if (location[i] === '市' || location[i] === '区' || location[i] === '县') {
+                        cityName = location.substring(0, i + 1);
+                        districtName = location.substring(i + 1);
+                        break;
+                    }
+                }
+
+                if (!cityGroups[cityName]) {
+                    cityGroups[cityName] = [];
+                }
+                cityGroups[cityName].push(item);
+            });
+
+            // 获取合计数据
+            const businessData = businessDistribution[currentBusiness] || {};
+            const total = businessData.total || 0;
+            const cityTotals = businessData.cityTotals || {};
+
+            modalBody.innerHTML = `
+                <div class="legend">
+                    <div class="legend-item"><span class="legend-dot dot-active"></span> 已开展</div>
+                    <div class="legend-item"><span class="legend-dot dot-expanding"></span> 积极拓展</div>
+                </div>
+                <div class="filter-bar" id="filterBar">
+                    <button class="filter-btn ${currentFilter === 'active' ? 'active' : ''}" onclick="filterCities('active')">已开展</button>
+                    <button class="filter-btn ${currentFilter === 'expanding' ? 'active' : ''}" onclick="filterCities('expanding')">积极拓展</button>
+                </div>
+                <div class="total-summary">
+                    <div class="total-card">
+                        <span class="total-label">经营单元合计</span>
+                        <span class="total-value">${total}</span>
+                        <span class="total-unit">个</span>
+                    </div>
+                </div>
+                <div class="city-groups">
+                    ${Object.entries(cityGroups).map(([city, items]) => `
+                        <div class="city-group-card">
+                            <div class="city-header">
+                                <span class="city-name">${city}</span>
+                                <span class="city-total">${cityTotals[city] || items.reduce((sum, item) => sum + (item.count || 0), 0)}个</span>
+                                <span class="district-count">${items.length}个区域</span>
+                            </div>
+                            <div class="district-list">
+                                ${items.map(item => {
+                                    const count = item.count || '';
+                                    const type = item.type || '';
+                                    const location = item.location || item;
+                                    const badge = (count && type)
+                                        ? `<span style="display:inline-block;margin-left:8px;padding:1px 6px;border-radius:3px;font-size:11px;background:#dbeafe;color:#1d4ed8;">${count}${type}</span>`
+                                        : '';
+                                    return `
+                                        <div class="district-item">
+                                            <span class="district-name">${location}</span>${badge}
+                                            <span class="status-dot dot-active"></span>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // 城市对应的省份映射
+        function getProvinceByCity(cityName) {
+            for (const [province, cities] of Object.entries(provinceCities)) {
+                if (cities.includes(cityName)) {
+                    return province;
+                }
+            }
+            return null;
+        }
+
+        // ===== 省份视图 =====
+        function renderProvinceView(cities) {
+            const modalBody = document.getElementById('modalBody');
+            
+            // 按省份分组统计
+            const provinceStats = {};
+            cities.forEach(city => {
+                const province = getProvinceByCity(city.city);
+                if (province) {
+                    if (!provinceStats[province]) {
+                        provinceStats[province] = { count: 0, cities: new Set() };
+                    }
+                    provinceStats[province].count++;
+                    provinceStats[province].cities.add(city.city);
+                }
+            });
+
+            modalBody.innerHTML = `
+                <div class="legend">
+                    <div class="legend-item"><span class="legend-symbol">√</span> 已开展</div>
+                    <div class="legend-item"><span class="legend-symbol">❓</span> 待开展</div>
+                    <div class="legend-item"><span class="legend-symbol">❓🌟</span> 积极拓展</div>
+                </div>
+                <div class="filter-bar" id="filterBar">
+                    <button class="filter-btn active" onclick="filterCities('all')">全部</button>
+                    <button class="filter-btn" onclick="filterCities('active')">已开展</button>
+                    <button class="filter-btn" onclick="filterCities('pending')">待开展</button>
+                    <button class="filter-btn" onclick="filterCities('expanding')">积极拓展</button>
+                </div>
+                <div class="province-grid">
+                    ${Object.entries(provinceStats).map(([province, stats]) => `
+                        <div class="province-card" onclick="selectProvince('${province}')">
+                            <div class="province-name">${province}</div>
+                            <div class="province-count">${stats.cities.size}个城市 · ${stats.count}个网点</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function selectProvince(province) {
+            currentProvince = province;
+            currentView = 'city';
+            renderView();
+        }
+
+        // ===== 城市视图 =====
+        function renderCityView(cities) {
+            const modalBody = document.getElementById('modalBody');
+            
+            // 过滤出当前省份的城市
+            const provinceCitiesData = cities.filter(city => getProvinceByCity(city.city) === currentProvince);
+            
+            // 按城市分组
+            const cityGroups = {};
+            provinceCitiesData.forEach(item => {
+                const key = item.city;
+                if (!cityGroups[key]) {
+                    cityGroups[key] = { districts: [], hasDistrictData: false };
+                }
+                if (item.district !== '-') {
+                    cityGroups[key].districts.push(item);
+                    cityGroups[key].hasDistrictData = true;
+                }
+            });
+
+            modalBody.innerHTML = `
+                <div class="legend">
+                    <div class="legend-item"><span class="legend-symbol">√</span> 已开展</div>
+                    <div class="legend-item"><span class="legend-symbol">❓</span> 待开展</div>
+                    <div class="legend-item"><span class="legend-symbol">❓🌟</span> 积极拓展</div>
+                </div>
+                <div class="filter-bar" id="filterBar">
+                    <button class="filter-btn active" onclick="filterCities('all')">全部</button>
+                    <button class="filter-btn" onclick="filterCities('active')">已开展</button>
+                    <button class="filter-btn" onclick="filterCities('pending')">待开展</button>
+                    <button class="filter-btn" onclick="filterCities('expanding')">积极拓展</button>
+                </div>
+                <div class="breadcrumb">
+                    <span class="breadcrumb-item" onclick="backToProvince()">省份</span>
+                    <span class="breadcrumb-separator">›</span>
+                    <span class="breadcrumb-current">${currentProvince}</span>
+                </div>
+                <div class="location-grid">
+                    ${Object.entries(cityGroups).map(([cityName, data]) => `
+                        <div class="location-card ${data.hasDistrictData ? 'expandable' : ''}" onclick="${data.hasDistrictData ? `selectCity('${cityName}')` : ''}">
+                            <div class="location-name">${cityName}</div>
+                            <div class="location-status">
+                                ${data.districts.length > 0 ? 
+                                    `${data.districts.length}个区县 · ${data.districts.filter(d => d.status === '√').length}已开展` : 
+                                    data.districts[0] ? `<span class="status-badge ${data.districts[0].statusClass}">${data.districts[0].statusText}</span>` : '待开展'
+                                }
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function backToProvince() {
+            currentView = 'province';
+            currentProvince = null;
+            renderView();
+        }
+
+        function selectCity(cityName) {
+            currentCity = cityName;
+            currentView = 'district';
+            renderView();
+        }
+
+        // ===== 区县视图 =====
+        function renderDistrictView(cities) {
+            const modalBody = document.getElementById('modalBody');
+            
+            // 过滤出当前城市的区县
+            const districts = cities.filter(city => city.city === currentCity && city.district !== '-');
+
+            modalBody.innerHTML = `
+                <div class="legend">
+                    <div class="legend-item"><span class="legend-symbol">√</span> 已开展</div>
+                    <div class="legend-item"><span class="legend-symbol">❓</span> 待开展</div>
+                    <div class="legend-item"><span class="legend-symbol">❓🌟</span> 积极拓展</div>
+                </div>
+                <div class="filter-bar" id="filterBar">
+                    <button class="filter-btn active" onclick="filterCities('all')">全部</button>
+                    <button class="filter-btn" onclick="filterCities('active')">已开展</button>
+                    <button class="filter-btn" onclick="filterCities('pending')">待开展</button>
+                    <button class="filter-btn" onclick="filterCities('expanding')">积极拓展</button>
+                </div>
+                <div class="breadcrumb">
+                    <span class="breadcrumb-item" onclick="backToProvince()">省份</span>
+                    <span class="breadcrumb-separator">›</span>
+                    <span class="breadcrumb-item" onclick="backToCity()">城市</span>
+                    <span class="breadcrumb-separator">›</span>
+                    <span class="breadcrumb-current">${currentCity}</span>
+                </div>
+                ${districts.length === 0 ? `
+                    <div class="empty-state">
+                        <div class="empty-icon">📋</div>
+                        <p>暂无区县数据</p>
+                    </div>
+                ` : `
+                    <table class="city-table">
+                        <thead>
+                            <tr>
+                                <th>区县</th>
+                                <th>城市中心</th>
+                                <th>状态</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${districts.map(district => `
+                                <tr>
+                                    <td>${district.district}</td>
+                                    <td>${district.region}</td>
+                                    <td><span class="status-badge ${district.statusClass}">${district.statusText}</span></td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `}
+            `;
+        }
+
+        function backToCity() {
+            currentView = 'city';
+            currentCity = null;
+            renderView();
+        }
+
+        // 点击模态框外部关闭
+        document.getElementById('distributionModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+
+        // ESC键关闭模态框
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

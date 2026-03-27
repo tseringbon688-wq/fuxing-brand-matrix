@@ -1,0 +1,965 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>福星医养集团 · 业务分布图（四级结构）</title>
+    <script src="echarts.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        .container { max-width: 1600px; margin: 0 auto; padding: 30px 20px; }
+        .header { text-align: center; color: white; margin-bottom: 25px; }
+        .header h1 {
+            font-size: 2.5em; margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .header .subtitle { font-size: 1.1em; color: #a5b4fc; }
+        .top-bar { display: flex; justify-content: center; gap: 15px; margin-bottom: 15px; }
+        .back-btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 10px 20px; background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2); border-radius: 25px;
+            color: white; text-decoration: none; font-size: 0.9em;
+            transition: all 0.3s; backdrop-filter: blur(10px);
+        }
+        .back-btn:hover { background: rgba(255,255,255,0.2); transform: translateY(-2px); }
+        .instruction {
+            text-align: center; padding: 15px 25px;
+            background: linear-gradient(135deg, rgba(102,126,234,0.2), rgba(118,75,162,0.2));
+            border-radius: 16px; color: #c4b5fd; font-size: 0.95em; margin-bottom: 25px;
+            border: 1px solid rgba(102,126,234,0.2);
+        }
+        .main-content { display: grid; grid-template-columns: 1fr 380px; gap: 25px; }
+        @media (max-width: 1200px) { .main-content { grid-template-columns: 1fr; } }
+        .map-container {
+            background: rgba(255,255,255,0.05); border-radius: 24px;
+            padding: 25px; backdrop-filter: blur(20px);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 25px 80px rgba(0,0,0,0.4);
+        }
+        .breadcrumb { display: flex; align-items: center; gap: 10px; margin-bottom: 15px; font-size: 0.95em; }
+        .breadcrumb-item {
+            color: #a5b4fc; cursor: pointer; padding: 6px 14px; border-radius: 18px;
+            transition: all 0.3s; background: rgba(255,255,255,0.05);
+        }
+        .breadcrumb-item:hover { background: rgba(255,255,255,0.15); color: white; }
+        .breadcrumb-item.active {
+            background: linear-gradient(135deg, #667eea, #764ba2); color: white;
+        }
+        .breadcrumb-sep { color: #667eea; }
+        #mapChart { width: 100%; height: 600px; border-radius: 16px; }
+        .loading-overlay {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: white; font-size: 1.2em; text-align: center;
+        }
+        .loading-spinner {
+            width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.1);
+            border-top-color: #667eea; border-radius: 50%;
+            animation: spin 1s linear infinite; margin: 0 auto 15px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .sidebar { display: flex; flex-direction: column; gap: 20px; }
+        .card {
+            background: rgba(255,255,255,0.05); border-radius: 20px; padding: 22px;
+            backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1);
+        }
+        .card h3 { font-size: 0.95em; color: #a5b4fc; margin-bottom: 18px; display: flex; align-items: center; gap: 8px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .stat-item {
+            text-align: center; padding: 18px 12px;
+            background: linear-gradient(135deg, rgba(102,126,234,0.3), rgba(118,75,162,0.3));
+            border-radius: 14px; border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s;
+        }
+        .stat-item:hover { transform: translateY(-3px); }
+        .stat-number {
+            font-size: 2em; font-weight: bold;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .stat-label { font-size: 0.8em; color: #c4b5fd; margin-top: 5px; }
+        .city-title { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+        .city-title h3 { font-size: 1.2em; color: white; margin: 0; }
+        .city-center-badge {
+            padding: 3px 10px; border-radius: 10px; font-size: 0.7em;
+            background: rgba(102,126,234,0.3); color: #a5b4fc;
+        }
+        .list-container { max-height: 580px; overflow-y: auto; padding-right: 5px; }
+        .list-container::-webkit-scrollbar { width: 5px; }
+        .list-container::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); border-radius: 3px; }
+        .list-container::-webkit-scrollbar-thumb { background: rgba(102,126,234,0.5); border-radius: 3px; }
+        .list-item {
+            display: flex; align-items: center; gap: 12px; padding: 12px;
+            border-radius: 12px; margin-bottom: 8px;
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.3s; cursor: pointer;
+        }
+        .list-item:hover {
+            background: rgba(255,255,255,0.08); transform: translateX(5px);
+            border-color: rgba(102,126,234,0.3);
+        }
+        .list-icon {
+            width: 40px; height: 40px; border-radius: 10px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2em; flex-shrink: 0;
+        }
+        .list-icon.active { background: linear-gradient(135deg, #10b981, #059669); color: white; }
+        .list-icon.expanding { background: linear-gradient(135deg, #3b82f6, #2563eb); color: white; }
+        .list-icon.pending { background: linear-gradient(135deg, #f59e0b, #d97706); color: white; }
+        .list-icon.none { background: rgba(255,255,255,0.1); color: #9ca3af; }
+        .list-info { flex: 1; min-width: 0; }
+        .list-name { font-weight: 600; color: white; font-size: 0.9em; }
+        .list-center { font-size: 0.75em; color: #a5b4fc; margin-top: 2px; }
+        .list-status {
+            padding: 5px 12px; border-radius: 12px; font-size: 0.72em; font-weight: 600;
+        }
+        .status-active { background: rgba(16,185,129,0.2); color: #10b981; }
+        .status-expanding { background: rgba(59,130,246,0.2); color: #3b82f6; }
+        .status-pending { background: rgba(245,158,11,0.2); color: #f59e0b; }
+        .status-none { background: rgba(255,255,255,0.1); color: #9ca3af; }
+        .list-count {
+            display: inline-block;
+            padding: 2px 8px;
+            background: rgba(16,185,129,0.3);
+            color: #10b981;
+            border-radius: 10px;
+            font-size: 0.75em;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+        .total-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            padding: 16px 24px;
+            margin-bottom: 16px;
+            display: flex;
+            gap: 20px;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        .total-stat {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .total-label {
+            font-size: 0.85em;
+            color: rgba(255,255,255,0.85);
+        }
+        .total-number {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: white;
+        }
+        .total-unit {
+            font-size: 0.8em;
+            color: rgba(255,255,255,0.75);
+        }
+        .total-divider {
+            width: 1px;
+            background: rgba(255,255,255,0.2);
+        }
+        .legend {
+            margin-top: 18px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1);
+            display: flex; flex-wrap: wrap; gap: 12px; font-size: 0.8em;
+        }
+        .legend-item { display: flex; align-items: center; gap: 6px; color: #c4b5fd; }
+        .legend-dot { width: 12px; height: 12px; border-radius: 50%; background: #10b981; }
+        .legend-dot.expanding { background: #3b82f6; }
+        .legend-dot.pending { background: #f59e0b; }
+        .empty-state { text-align: center; padding: 50px 20px; color: #6b7280; }
+        .empty-icon { font-size: 3.5em; margin-bottom: 12px; opacity: 0.5; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="top-bar">
+                <a href="福星医养集团品牌矩阵.html" class="back-btn">← 返回品牌矩阵</a>
+            </div>
+            <h1>深耕城市-业务分布图</h1>
+            <p class="subtitle">全国 → 省份 → 地级市 → 区县 → 业务详情</p>
+        </div>
+        <div class="instruction">💡 点击地图上的省份区域查看城市，点击城市查看区县，点击区县查看业务详情</div>
+        <div class="main-content">
+            <div class="map-container">
+                <div class="breadcrumb" id="breadcrumb">
+                    <span class="breadcrumb-item active">🏠 全国</span>
+                </div>
+                <div style="position: relative;">
+                    <div id="mapChart"></div>
+                    <div class="loading-overlay" id="loadingOverlay">
+                        <div class="loading-spinner"></div>
+                        <div>加载地图数据中...</div>
+                    </div>
+                </div>
+            </div>
+            <div class="sidebar">
+                <div class="card">
+                    <h3>📊 业务覆盖统计</h3>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-number" id="provinceCount">0</div>
+                            <div class="stat-label">战略省份</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="cityCount">0</div>
+                            <div class="stat-label">战略城市</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="businessCount">0</div>
+                            <div class="stat-label">已开展业务</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="expandingCount">0</div>
+                            <div class="stat-label">积极拓展中</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="city-title">
+                        <h3 id="cityDetailTitle">🏙️ 战略城市</h3>
+                    </div>
+                    <div class="list-container" id="listContainer">
+                        <div class="empty-state">
+                            <div class="empty-icon">🗺️</div>
+                            <p>点击地图上的省份区域<br>查看战略城市列表</p>
+                        </div>
+                    </div>
+                    <div class="legend">
+                        <div class="legend-item"><div class="legend-dot active"></div><span>有业务</span></div>
+                        <div class="legend-item"><div class="legend-dot expanding"></div><span>积极拓展</span></div>
+                        <div class="legend-item"><div class="legend-dot pending"></div><span>待开展</span></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===== 四级结构数据 =====
+        
+        // Level 1: 省份 → 战略城市列表（绿色，不分颜色）
+        const provinceStrategicCities = {
+            '江苏': ['苏州市', '徐州市', '扬州市', '无锡市', '淮安市', '连云港市', '泰州市', '镇江市'],
+            '广东': ['广州市', '东莞市', '佛山市', '深圳市', '中山市', '惠州市'],
+            '浙江': ['嘉兴市', '丽水市', '宁波市', '杭州市'],
+            '北京': ['北京市'],
+            '安徽': ['安庆市', '合肥市'],
+            '四川': ['成都市', '宜宾市', '南充市', '广元市', '绵阳市'],
+            '贵州': ['贵阳市']
+        };
+
+        // Level 2: 地级市 → 区县列表（全部区县，不管表格写没写）
+        // 从china-echarts.json中获取区县数据
+        // 格式：{"name": "苏州市", "children": [{"name": "常熟市"}, {"name": "张家港市"}...]}
+
+        // 省份中心坐标
+        const provinceCoords = {
+            '贵州': [106.7, 26.6],
+            '广东': [113.3, 23.1],
+            '江苏': [119.2, 32.6],
+            '浙江': [120.2, 29.1],
+            '北京': [116.4, 39.9],
+            '安徽': [117.3, 31.8],
+            '四川': [104.1, 30.6]
+        };
+
+        // 业务数据（按城市+区县层级）- 从Excel导入（2026年3月27日16:16版）
+        // status: 'active'=绿色有业务, 'expanding'=蓝色积极拓展
+        const cityBusinessData = {
+    '贵阳市': { center: '大湾区城市中心', status: 'active', businesses: [{name:'医保护理院', status:'active', count:1, icon:'🏥'}, {name:'政采居家业务', status:'active', count:1, icon:'🏠'}]},
+    '广州市': { center: '大湾区城市中心', status: 'active', businesses: [{name:'医保护理院', status:'active', count:1, icon:'🏥'}]},
+    '东莞市': { center: '大湾区城市中心', status: 'active', businesses: [{name:'医保护理院', status:'active', count:1, icon:'🏥'}]},
+    '佛山市': { center: '大湾区城市中心', status: 'expanding', businesses: []},
+    '深圳市': { center: '大湾区城市中心', status: 'expanding', businesses: []},
+    '中山市': { center: '大湾区城市中心', status: 'expanding', businesses: []},
+    '惠州市': { center: '大湾区城市中心', status: 'expanding', businesses: []},
+    '徐州市': { center: '徐州城市中心', status: 'active', businesses: [{name:'长护护理院', status:'active', count:1, icon:'🏥'}, {name:'政采居家业务', status:'active', count:1, icon:'🏠'}, {name:'长护险居家业务', status:'active', count:4, icon:'💚'}]},
+    '淮安市': { center: '徐州城市中心', status: 'active', businesses: [{name:'政采居家业务', status:'active', count:1, icon:'🏠'}, {name:'社区日间照料综合体', status:'active', count:12, icon:'🏘️'}, {name:'长护险居家业务', status:'active', count:4, icon:'💚'}]},
+    '连云港市': { center: '徐州城市中心', status: 'active', businesses: [{name:'政采居家业务', status:'active', count:1, icon:'🏠'}, {name:'长护险居家业务', status:'active', count:4, icon:'💚'}]},
+    '苏州市': { center: '苏州总部 + 常熟城市中心', status: 'active', businesses: [{name:'医保护理院', status:'active', count:1, icon:'🏥'}, {name:'政采居家业务', status:'active', count:1, icon:'🏠'}, {name:'长护险居家业务', status:'active', count:4, icon:'💚'}, {name:'社区日间照料综合体', status:'active', count:12, icon:'🏘️'}, {name:'社区食堂厨房', status:'active', count:5, icon:'🍱'}, {name:'社区助餐点', status:'active', count:7, icon:'🍱'}]},
+    '无锡市': { center: '江苏南部战区', status: 'active', businesses: [{name:'社区日间照料综合体', status:'active', count:12, icon:'🏘️'}, {name:'社区食堂厨房', status:'active', count:5, icon:'🍱'}, {name:'社区助餐点', status:'active', count:7, icon:'🍱'}]},
+    '镇江市': { center: '江苏南部战区', status: 'expanding', businesses: []},
+    '扬州市': { center: '江苏中部战区', status: 'active', businesses: [{name:'政采居家业务', status:'active', count:1, icon:'🏠'}, {name:'长护险居家业务', status:'active', count:4, icon:'💚'}, {name:'社区日间照料综合体', status:'active', count:12, icon:'🏘️'}, {name:'社区食堂厨房', status:'active', count:5, icon:'🍱'}, {name:'社区助餐点', status:'active', count:7, icon:'🍱'}]},
+    '泰州市': { center: '泰兴城市中心', status: 'active', businesses: [{name:'长护公寓', status:'active', count:1, icon:'🏠'}, {name:'政采居家业务', status:'active', count:1, icon:'🏠'}, {name:'长护险居家业务', status:'active', count:4, icon:'💚'}, {name:'社区日间照料综合体', status:'active', count:12, icon:'🏘️'}, {name:'社区食堂厨房', status:'active', count:5, icon:'🍱'}, {name:'社区助餐点', status:'active', count:7, icon:'🍱'}]},
+    '北京市': { center: '浙皖战区', status: 'active', businesses: [{name:'政采居家业务', status:'active', count:1, icon:'🏠'}, {name:'长护险居家业务', status:'active', count:4, icon:'💚'}]},
+    '安庆市': { center: '浙皖战区', status: 'active', businesses: [{name:'社区日间照料综合体', status:'active', count:12, icon:'🏘️'}]},
+    '合肥市': { center: '新兴区域', status: 'expanding', businesses: []},
+    '嘉兴市': { center: '浙皖战区', status: 'active', businesses: [{name:'社区日间照料综合体', status:'active', count:12, icon:'🏘️'}, {name:'长护险居家业务', status:'active', count:4, icon:'💚'}]},
+    '丽水市': { center: '浙皖战区', status: 'active', businesses: [{name:'长护险居家业务', status:'active', count:4, icon:'💚'}]},
+    '宁波市': { center: '浙皖战区', status: 'active', businesses: [{name:'社区日间照料综合体', status:'active', count:12, icon:'🏘️'}, {name:'社区食堂厨房', status:'active', count:5, icon:'🍱'}, {name:'社区助餐点', status:'active', count:7, icon:'🍱'}]},
+    '杭州市': { center: '浙皖战区', status: 'expanding', businesses: []},
+    '成都市': { center: '新兴区域', status: 'expanding', businesses: []},
+    '宜宾市': { center: '新兴区域', status: 'expanding', businesses: []},
+    '南充市': { center: '新兴区域', status: 'expanding', businesses: []},
+    '广元市': { center: '新兴区域', status: 'expanding', businesses: []},
+    '绵阳市': { center: '新兴区域', status: 'expanding', businesses: []}
+        };
+
+        // 区县业务数据 - 从Excel导入（2026年3月27日16:16版）
+        // ⚠️ 重名区县用"城市名_区县名"复合key区分，查找时使用 getDistrictData(cityName, districtName)
+        const districtBusinessData = {
+    // 贵阳市
+    '南明区': { center: '大湾区城市中心', businesses: [{name:'医保护理院', status:'active', count:1, icon:'🏥'}, {name:'政采居家业务', status:'active', count:1, icon:'🏠'}]},
+    // 广州市
+    '海珠区': { center: '大湾区城市中心', businesses: [{name:'医保护理院', status:'active', count:1, icon:'🏥'}]},
+    // 东莞市
+    '莞城街道': { center: '大湾区城市中心', businesses: [{name:'医保护理院', status:'active', count:1, icon:'🏥'}]},
+    '万江街道': { center: '大湾区城市中心', businesses: [{name:'医保护理院', status:'active', count:1, icon:'🏥'}]},
+    // 徐州市
+    '沛县': { center: '徐州城市中心', businesses: [{name:'长护护理院', status:'active', count:1, icon:'🏥'}, {name:'政采居家业务', status:'active', count:1, icon:'🏠'}, {name:'长护险居家业务', status:'active', count:4, icon:'💚'}]},
+    '丰县': { center: '徐州城市中心', businesses: [{name:'长护险居家业务', status:'active', count:4, icon:'💚'}]},
+    '贾汪区': { center: '徐州城市中心', businesses: [{name:'长护险居家业务', status:'active', count:4, icon:'💚'}]},
+    // 淮安市
+    '清江浦区': { center: '徐州城市中心', businesses: [{name:'社区日间照料综合体', status:'active', count:12, icon:'🏘️'}]},
+    '淮安区': { center: '徐州城市中心', businesses: [{name:'长护险居家业务', status:'active', count:4, icon:'💚'}]},
+    '淮安市_经济技术开发区': { center: '徐州城市中心', businesses: [{name:'政采居家业务', status:'active', count:1, icon:'🏠'}, {name:'社区日间照料综合体', status:'active', count:12, icon:'🏘️'}]},
+    // 连云港市
+    '灌云县': { center: '徐州城市中心', businesses: [{name:'政采居家业务', status:'active', count:1, icon:'🏠'}]},
+    '海州区': { center: '徐州城市中心', businesses: [{name:'长护险居家业务', status:'active', count:4, icon:'💚'}]},
+    // 苏州市 - 常熟城市中心
+    '常熟市': { center: '常熟城市中心', businesses: [{name:'医保护理院', status:'active', count:1, icon:'🏥'}, {name:'长护险居家业务', status:'active', count:4, icon:'💚'}]},
+    // 苏州市 - 苏州总部
+    '姑苏区': { center: '苏州总部', businesses: [{name:'医保护理院', status:'active', count:1, icon:'🏥'}, {name:'政采居家业务', status:'active', count:1, icon:'🏠'}, {name:'长护险居家业务', status:'active', count:4, icon:'💚'}, {name:'社区日间照料综合体', status:'active', count:12, icon:'🏘️'}, {name:'社区食堂厨房', status:'active', count:5, icon:'🍱'}, {name:'社区助餐点', status:'active', count:7, icon:'🍱'}]},
+    '相城区': { center: '苏州总部', businesses: [{name:'长护险居家业务', status:'active', count:4, icon:'💚'}]},
+    '工业园区': { center: '苏州总部', businesses: [{name:'政采居家业务', status:'active', count:1, icon:'🏠'}, {name:'长护险居家业务', status:'active', count:4, icon:'💚'}, {name:'社区日间照料综合体', status:'active', count:12, icon:'🏘️'}]},
+    '吴中区': { center: '苏州总部', businesses: [{name:'医保护理院', status:'active', count:1, icon:'🏥'}, {name:'政采居家业务', status:'active', count:1, icon:'🏠'}, {name:'长护险居家业务', status:'active', count:4, icon:'💚'}, {name:'社区日间照料综合体', status:'active', count:12, icon:'🏘️'}, {name:'社区助餐点', status:'active', count:7, icon:'🍱'}]},
+    '高新区': { center: '苏州总部', businesses: [{name:'医保护理院', status:'active', count:1, icon:'🏥'}, {name:'政采居家业务', status:'active', count:1, icon:'🏠'}, {name:'长护险居家业务', status:'active', count:4, icon:'💚'}, {name:'社区日间照料综合体', status:'active', count:12, icon:'🏘️'}, {name:'社区食堂厨房', status:'active', count:5, icon:'🍱'}, {name:'社区助餐点', status:'active', count:7, icon:'🍱'}]},
+    '太仓市': { center: '苏州总部', businesses: [{name:'政采居家业务', status:'active', count:1, icon:'🏠'}, {name:'长护险居家业务', status:'active', count:4, icon:'💚'}, {name:'社区日间照料综合体', status:'active', count:12, icon:'🏘️'}, {name:'社区食堂厨房', status:'active', count:5, icon:'🍱'}, {name:'社区助餐点', status:'active', count:7, icon:'🍱'}]},
+    '张家港市': { center: '苏州总部', businesses: [{name:'长护险居家业务', status:'active', count:4, icon:'💚'}]},
+    '昆山市': { center: '苏州总部', businesses: []},
+    // 无锡市
+    '惠山区': { center: '江苏南部战区', businesses: [{name:'社区日间照料综合体', status:'active', count:12, icon:'🏘️'}, {name:'社区食堂厨房', status:'active', count:5, icon:'🍱'}, {name:'社区助餐点', status:'active', count:7, icon:'🍱'}]},
+    // 扬州市
+    '江都区': { center: '江苏中部战区', businesses: [{name:'政采居家业务', status:'active', count:1, icon:'🏠'}, {name:'长护险居家业务', status:'active', count:4, icon:'💚'}, {name:'社区日间照料综合体', status:'active', count:12, icon:'🏘️'}, {name:'社区食堂厨房', status:'active', count:5, icon:'🍱'}, {name:'社区助餐点', status:'active', count:7, icon:'🍱'}]},
+    '高邮市': { center: '江苏中部战区', businesses: [{name:'长护险居家业务', status:'active', count:4, icon:'💚'}]},
+    // 泰州市
+    '海陵区': { center: '泰兴城市中心', businesses: [{name:'长护险居家业务', status:'active', count:4, icon:'💚'}, {name:'社区日间照料综合体', status:'active', count:12, icon:'🏘️'}]},
+    '姜堰区': { center: '泰兴城市中心', businesses: [{name:'长护险居家业务', status:'active', count:4, icon:'💚'}]},
+    '兴化': { center: '泰兴城市中心', businesses: [{name:'长护险居家业务', status:'active', count:4, icon:'💚'}]},
+    '靖江': { center: '泰兴城市中心', businesses: [{name:'长护险居家业务', status:'active', count:4, icon:'💚'}]},
+    '泰兴': { center: '泰兴城市中心', businesses: [{name:'长护公寓', status:'active', count:1, icon:'🏠'}, {name:'政采居家业务', status:'active', count:1, icon:'🏠'}, {name:'社区日间照料综合体', status:'active', count:12, icon:'🏘️'}, {name:'社区食堂厨房', status:'active', count:5, icon:'🍱'}, {name:'社区助餐点', status:'active', count:7, icon:'🍱'}]},
+    // 北京市
+    '通州区': { center: '浙皖战区', businesses: [{name:'政采居家业务', status:'active', count:1, icon:'🏠'}]},
+    '石景山区': { center: '浙皖战区', businesses: [{name:'长护险居家业务', status:'active', count:4, icon:'💚'}]},
+    // 安庆市
+    '安庆市_经济技术开发区': { center: '浙皖战区', businesses: [{name:'社区日间照料综合体', status:'active', count:12, icon:'🏘️'}]},
+    // 嘉兴市
+    '嘉善县': { center: '浙皖战区', businesses: [{name:'长护险居家业务', status:'active', count:4, icon:'💚'}]},
+    '秀洲区': { center: '浙皖战区', businesses: [{name:'社区日间照料综合体', status:'active', count:12, icon:'🏘️'}]},
+    // 丽水市
+    '莲都区': { center: '浙皖战区', businesses: [{name:'长护险居家业务', status:'active', count:4, icon:'💚'}]},
+    '缙云县': { center: '浙皖战区', businesses: [{name:'长护险居家业务', status:'active', count:4, icon:'💚'}]},
+    // 宁波市
+    '镇海区': { center: '浙皖战区', businesses: [{name:'社区日间照料综合体', status:'active', count:12, icon:'🏘️'}, {name:'社区食堂厨房', status:'active', count:5, icon:'🍱'}, {name:'社区助餐点', status:'active', count:7, icon:'🍱'}]}
+        };
+
+        // 地级市对应的区县列表（从补充区县的Excel中读取）
+        const cityDistricts = {
+            '苏州市': ['常熟市', '姑苏区', '相城区', '工业园区', '吴中区', '高新区', '太仓市', '张家港市', '昆山市'],
+            '扬州市': ['江都区', '高邮市', '邗江区', '宝应县', '仪征市', '广陵区'],
+            '泰州市': ['兴化', '靖江', '泰兴', '海陵区', '高港区', '姜堰区'],
+            '徐州市': ['铜山区', '云龙区', '泉山区', '贾汪区', '鼓楼区', '丰县', '沛县', '睢宁县', '新沂市', '邳州市'],
+            '淮安市': ['清江浦区', '淮安区', '淮阴区', '洪泽区', '涟水县', '盱眙县', '金湖县', '经济技术开发区'],
+            '连云港市': ['连云区', '海州区', '赣榆区', '灌南县', '灌云县', '东海县'],
+            '无锡市': ['梁溪区', '锡山区', '惠山区', '滨湖区', '新吴区', '江阴市', '宜兴市'],
+            '镇江市': ['京口区', '润州区', '丹徒区', '丹阳市', '扬中市', '句容市'],
+            '广州市': ['荔湾区', '越秀区', '海珠区', '天河区', '白云区', '黄埔区', '番禺区', '花都区', '南沙区', '从化区', '增城区'],
+            '深圳市': ['罗湖区', '福田区', '南山区', '宝安区', '龙岗区', '盐田区', '龙华区', '坪山区', '光明区', '大鹏新区'],
+            '佛山市': ['禅城区', '南海区', '顺德区', '高明区', '三水区'],
+            '东莞市': ['莞城街道', '南城街道', '东城街道', '万江街道', '石碣镇', '石龙镇', '茶山镇', '石排镇', '企石镇', '横沥镇', '桥头镇', '谢岗镇', '东坑镇', '常平镇', '寮步镇', '樟木头镇', '大朗镇', '黄江镇', '清溪镇', '塘厦镇', '凤岗镇', '大岭山镇', '长安镇', '虎门镇', '厚街镇', '沙田镇', '道滘镇', '洪梅镇', '望牛墩镇', '中堂镇', '高埗镇'],
+            '中山市': ['石岐街道', '东区街道', '西区街道', '南区街道', '五桂山街道', '小榄镇', '黄圃镇', '民众镇', '东凤镇', '南头镇', '东升镇', '古镇镇', '沙溪镇', '坦洲镇', '港口镇', '三角镇', '横栏镇', '南朗镇', '三乡镇', '板芙镇', '大涌镇', '神湾镇'],
+            '惠州市': ['惠城区', '惠阳区', '博罗县', '惠东县', '龙门县', '大亚湾区', '仲恺高新区'],
+            '北京市': ['东城区', '西城区', '朝阳区', '丰台区', '石景山区', '海淀区', '门头沟区', '房山区', '通州区', '顺义区', '昌平区', '大兴区', '怀柔区', '平谷区', '密云区', '延庆区'],
+            '安庆市': ['迎江区', '大观区', '宜秀区', '怀宁县', '太湖县', '宿松县', '望江县', '岳西县', '桐城市', '潜山市', '经济技术开发区'],
+            '嘉兴市': ['南湖区', '秀洲区', '海宁市', '平湖市', '桐乡市', '嘉善县', '海盐县'],
+            '丽水市': ['莲都区', '青田县', '缙云县', '遂昌县', '松阳县', '云和县', '庆元县', '景宁畲族自治县', '龙泉市'],
+            '宁波市': ['海曙区', '江北区', '北仑区', '镇海区', '鄞州区', '奉化区', '象山县', '宁海县', '余姚市', '慈溪市'],
+            '杭州市': ['上城区', '拱墅区', '西湖区', '滨江区', '萧山区', '余杭区', '临平区', '钱塘区', '富阳区', '临安区', '桐庐县', '淳安县', '建德市'],
+            '成都市': ['锦江区', '青羊区', '金牛区', '武侯区', '成华区', '龙泉驿区', '青白江区', '新都区', '温江区', '双流区', '郫都区', '新津区', '金堂县', '大邑县', '蒲江县', '都江堰市', '彭州市', '邛崃市', '崇州市', '简阳市'],
+            '宜宾市': ['翠屏区', '叙州区', '南溪区', '江安县', '长宁县', '高县', '珙县', '筠连县', '兴文县', '屏山县'],
+            '南充市': ['顺庆区', '高坪区', '嘉陵区', '南部县', '营山县', '蓬安县', '仪陇县', '西充县', '阆中市'],
+            '广元市': ['利州区', '昭化区', '朝天区', '旺苍县', '青川县', '剑阁县', '苍溪县'],
+            '绵阳市': ['涪城区', '游仙区', '安州区', '三台县', '盐亭县', '梓潼县', '北川羌族自治县', '平武县', '江油市'],
+            '合肥市': ['瑶海区', '庐阳区', '蜀山区', '包河区', '长丰县', '肥东县', '肥西县', '庐江县', '巢湖市'],
+            '贵阳市': ['南明区', '云岩区', '花溪区', '乌当区', '白云区', '观山湖区', '开阳县', '息烽县', '修文县', '清镇市']
+        };
+
+        // 地级市坐标
+        const cityCoords = {
+            '贵阳市': [106.7, 26.6],
+            '广州市': [113.3, 23.1],
+            '东莞市': [113.8, 23.0],
+            '佛山市': [113.1, 23.0],
+            '深圳市': [114.1, 22.5],
+            '中山市': [113.4, 22.5],
+            '徐州市': [117.2, 34.3],
+            '淮安市': [119.0, 33.6],
+            '连云港市': [119.2, 34.6],
+            '苏州市': [120.6, 31.3],
+            '常熟市': [120.7, 31.7],
+            '姑苏区': [120.6, 31.3],
+            '相城区': [120.6, 31.4],
+            '工业园区': [120.7, 31.3],
+            '吴中区': [120.6, 31.3],
+            '高新区': [120.5, 31.3],
+            '太仓市': [121.1, 31.5],
+            '张家港市': [120.6, 31.9],
+            '昆山市': [121.0, 31.4],
+            '无锡市': [120.3, 31.6],
+            '扬州市': [119.4, 32.4],
+            '江都区': [119.6, 32.4],
+            '高邮市': [119.5, 32.8],
+            '邗江区': [119.4, 32.4],
+            '泰州市': [119.9, 32.5],
+            '兴化市': [119.8, 32.9],
+            '靖江市': [120.3, 32.0],
+            '泰州市区': [119.9, 32.5],
+            '北京市': [116.4, 39.9],
+            '安庆市': [117.0, 30.5],
+            '嘉兴市': [120.8, 30.8],
+            '丽水市': [119.9, 28.5],
+            '宁波市': [121.5, 29.9],
+            '杭州市': [120.2, 30.3],
+            '成都市': [104.1, 30.7],
+            '宜宾市': [104.6, 28.8],
+            '南充市': [106.1, 30.8],
+            '广元市': [105.8, 32.4],
+            '绵阳市': [104.7, 31.5],
+            '合肥市': [117.3, 31.9],
+            '镇江市': [119.4, 32.2],
+            '惠州市': [114.4, 23.1]
+        };
+
+        // 城市对应的省份
+        const cityProvinces = {
+            '贵阳市':'贵州','广州市':'广东','东莞市':'广东','佛山市':'广东','深圳市':'广东','中山市':'广东','惠州市':'广东',
+            '徐州市':'江苏','淮安市':'江苏','连云港市':'江苏','苏州市':'江苏',
+            '姑苏区':'江苏','相城区':'江苏','工业园区':'江苏','吴中区':'江苏','高新区':'江苏','太仓市':'江苏','张家港市':'江苏','昆山市':'江苏','常熟市':'江苏',
+            '无锡市':'江苏','扬州市':'江苏','江都区':'江苏','高邮市':'江苏','邗江区':'江苏',
+            '泰州市':'江苏','兴化市':'江苏','靖江市':'江苏','泰兴市':'江苏','镇江市':'江苏',
+            '北京市':'北京','安庆市':'安徽','合肥市':'安徽',
+            '嘉兴市':'浙江','丽水市':'浙江','宁波市':'浙江','杭州市':'浙江',
+            '成都市':'四川','宜宾市':'四川','南充市':'四川','广元市':'四川','绵阳市':'四川'
+        };
+
+        // 16个业务线（全部显示）
+        const allBusinessLines = [
+            {name:'医保护理院', icon:'🏥'},
+            {name:'长护护理院', icon:'🏥'},
+            {name:'长护公寓', icon:'🏠'},
+            {name:'政采居家业务', icon:'🏠'},
+            {name:'长护险居家业务', icon:'💚'},
+            {name:'适老家政', icon:'🏘️'},
+            {name:'家庭护理院', icon:'🏘️'},
+            {name:'社区日间照料综合体', icon:'🏘️'},
+            {name:'社区食堂厨房', icon:'🍱'},
+            {name:'社区助餐点', icon:'🍱'},
+            {name:'食材配送业务', icon:'🥬'},
+            {name:'星链优品线上商城', icon:'🛍'},
+            {name:'福气满满线下集市', icon:'🎊'},
+            {name:'适老直播内容', icon:'📺'},
+            {name:'老年大学业务', icon:'📚'},
+            {name:'老年旅游业务', icon:'✈️'}
+        ];
+
+        // 辅助函数：查找区县业务数据，支持复合key（解决重名区县问题）
+        // 优先查 "城市名_区县名"，找不到再查 "区县名"
+        function getDistrictData(cityName, districtName) {
+            const compositeKey = cityName + '_' + districtName;
+            return districtBusinessData[compositeKey] || districtBusinessData[districtName] || null;
+        }
+
+        let currentView = 'china';
+        let chart = null;
+        let currentProvince = null;
+        let currentCity = null;
+        let currentDistrict = null;
+        let chinaJson = null;
+
+        // ===== 初始化 =====
+        function initChart() {
+            console.log('开始初始化地图...');
+
+            // 检查echarts是否加载
+            if (typeof echarts === 'undefined') {
+                console.error('❌ echarts未加载');
+                document.getElementById('loadingOverlay').innerHTML = '<div style="color:#f59e0b;">echarts库加载失败，请刷新页面</div>';
+                return;
+            }
+            console.log('✅ echarts已加载');
+
+            // 检查DOM元素
+            const mapDiv = document.getElementById('mapChart');
+            if (!mapDiv) {
+                console.error('❌ mapChart元素不存在');
+                return;
+            }
+            console.log('✅ mapChart元素存在');
+
+            // 初始化chart
+            chart = echarts.init(mapDiv);
+            console.log('✅ echarts.init成功');
+
+            // 加载中国地图GeoJSON（使用fetch方式）
+            console.log('开始加载china-echarts.json...');
+            fetch('china-echarts.json?t=' + Date.now())
+                .then(res => {
+                    console.log(`fetch响应: ${res.status} ${res.statusText}`);
+                    if (!res.ok) throw new Error('HTTP ' + res.status);
+                    return res.json();
+                })
+                .then(json => {
+                    console.log(`✅ 地图数据加载成功, features: ${json.features.length}`);
+
+                    chinaJson = json;
+                    echarts.registerMap('china', chinaJson);
+                    console.log('✅ echarts.registerMap成功');
+
+                    document.getElementById('loadingOverlay').style.display = 'none';
+                    renderChinaMap();
+                    updateStats();
+                    console.log('🎉 地图渲染完成，共', chinaJson.features.length, '个省份');
+                })
+                .catch(err => {
+                    console.error('❌ 地图加载失败:', err);
+                    document.getElementById('loadingOverlay').innerHTML = '<div style="color:#f59e0b;">地图数据加载失败: ' + err.message + '</div>';
+                });
+            window.onresize = () => chart && chart.resize();
+        }
+
+        // ===== 全国地图视图 =====
+        function renderChinaMap() {
+            currentView = 'china';
+            updateBreadcrumb();
+
+            // 构建散点数据（省份标签）
+            const scatterData = Object.keys(provinceStrategicCities).map(province => {
+                const coords = provinceCoords[province];
+                const cities = provinceStrategicCities[province];
+
+                return {
+                    name: province,
+                    value: coords,
+                    itemStyle: { color: '#10b981' }, // 统一绿色，不分颜色
+                    label: {
+                        show: true,
+                        formatter: province + '\n' + cities.length + '市',
+                        fontSize: 12,
+                        fontWeight: 'bold',
+                        color: '#fff',
+                        backgroundColor: '#10b981',
+                        padding: [6, 12],
+                        borderRadius: 4,
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    },
+                    symbolSize: 0
+                };
+            });
+
+            const option = {
+                backgroundColor: 'transparent',
+                tooltip: {
+                    trigger: 'item',
+                    formatter: function(params) {
+                        if (params.seriesType === 'map' && params.name && provinceStrategicCities[params.name]) {
+                            return `<strong>${params.name}</strong><br><small>点击进入查看城市</small>`;
+                        }
+                        return '';
+                    }
+                },
+                geo: {
+                    map: 'china',
+                    roam: true,
+                    zoom: 1.2,
+                    scaleLimit: { min: 0.8, max: 3 },
+                    emphasis: {
+                        label: { show: false },
+                        itemStyle: { areaColor: '#667eea', shadowColor: 'rgba(102,126,234,0.5)', shadowBlur: 20 }
+                    },
+                    itemStyle: {
+                        areaColor: '#f3f4f6',
+                        borderColor: '#d1d5db',
+                        borderWidth: 1
+                    }
+                },
+                series: [
+                    {
+                        name: '中国地图',
+                        type: 'map',
+                        geoIndex: 0,
+                        select: { disabled: true }
+                    },
+                    {
+                        name: '省份标签',
+                        type: 'scatter',
+                        coordinateSystem: 'geo',
+                        data: scatterData,
+                        zlevel: 2,
+                        symbolSize: 0,
+                        tooltip: { show: false },
+                        emphasis: {
+                            label: {
+                                fontSize: 14,
+                                fontWeight: 'bold'
+                            }
+                        }
+                    }
+                ]
+            };
+
+            chart.setOption(option, true);
+
+            // 绑定点击事件
+            chart.off('click');
+            chart.on('click', function(params) {
+                if (params.seriesType === 'map' && params.name && provinceStrategicCities[params.name]) {
+                    renderProvinceMap(params.name);
+                } else if (params.seriesType === 'scatter' && params.name && provinceStrategicCities[params.name]) {
+                    renderProvinceMap(params.name);
+                }
+            });
+        }
+
+        // ===== 省份地图视图（地级市列表） =====
+        function renderProvinceMap(province) {
+            currentView = 'province';
+            currentProvince = province;
+            updateBreadcrumb();
+            showCityList(province);
+
+            // 计算省份中心
+            const cities = provinceStrategicCities[province] || [];
+            const center = provinceCoords[province];
+
+            // 构建地级市标签数据（只显示地级市）
+            const scatterData = cities.map(city => {
+                const coords = cityCoords[city];
+                const d = cityBusinessData[city];
+                const color = getCityStatusColor(city);
+
+                return {
+                    name: city,
+                    value: coords,
+                    itemStyle: { color: color },
+                    label: {
+                        show: true,
+                        formatter: city,
+                        fontSize: 12,
+                        fontWeight: 'bold',
+                        color: '#fff',
+                        backgroundColor: color,
+                        padding: [5, 10],
+                        borderRadius: 4,
+                        borderWidth: 2,
+                        borderColor: '#fff'
+                    },
+                    symbolSize: 0,
+                    labelLayout: { hideOverlap: true, dx: 10 }
+                };
+            });
+
+            const option = {
+                backgroundColor: 'transparent',
+                tooltip: {
+                    trigger: 'item',
+                    formatter: function(params) {
+                        if (params.name) {
+                            const cityName = params.name;
+                            const d = cityBusinessData[cityName];
+                            if (d && d.businesses.length > 0) {
+                                return `<strong>${cityName}</strong><br>` +
+                                       d.businesses.map(b => `${b.icon} ${b.name}`).join('<br>');
+                            }
+                            return `<strong>${cityName}</strong><br>暂无业务数据`;
+                        }
+                        return '';
+                    }
+                },
+                geo: {
+                    map: 'china',
+                    roam: true,
+                    zoom: 3,
+                    center: center,
+                    scaleLimit: { min: 2, max: 10 },
+                    emphasis: {
+                        label: { show: true },
+                        itemStyle: { areaColor: '#667eea' }
+                    },
+                    itemStyle: {
+                        areaColor: '#f3f4f6',
+                        borderColor: '#d1d5db',
+                        borderWidth: 1
+                    }
+                },
+                series: [
+                    {
+                        name: province,
+                        type: 'map',
+                        geoIndex: 0,
+                        select: { disabled: true }
+                    },
+                    {
+                        name: '城市标签',
+                        type: 'scatter',
+                        coordinateSystem: 'geo',
+                        data: scatterData,
+                        zlevel: 2,
+                        symbolSize: 0,
+                        tooltip: { show: false },
+                        emphasis: {
+                            label: {
+                                fontSize: 13,
+                                fontWeight: 'bold'
+                            }
+                        }
+                    }
+                ]
+            };
+
+            chart.setOption(option, true);
+
+            // 绑定点击事件：点击地级市 → 进入区县视图
+            chart.off('click');
+            chart.on('click', function(params) {
+                if (params.seriesType === 'scatter' && params.name && cities.includes(params.name)) {
+                    renderCityView(province, params.name);
+                }
+            });
+        }
+
+        // ===== 地级市视图（区县列表） =====
+        function renderCityView(province, cityName) {
+            currentView = 'city';
+            currentProvince = province;
+            currentCity = cityName;
+            updateBreadcrumb();
+            showDistrictList(province, cityName);
+        }
+
+        // ===== 显示地级市列表（右侧） =====
+        function showCityList(province) {
+            document.getElementById('cityDetailTitle').innerHTML = `🏙️ ${province} · 地级市`;
+            const list = document.getElementById('listContainer');
+            const cities = provinceStrategicCities[province] || [];
+
+            list.innerHTML = cities.map(city => {
+                const d = cityBusinessData[city];
+                // 使用status字段判断：active=绿色有业务，expanding=蓝色积极拓展
+                const status = d ? (d.status || 'expanding') : 'expanding';
+                const center = d ? d.center : '积极拓展中';
+                const statusText = status === 'active' ? '有业务' : '积极拓展';
+
+                return `
+                <div class="list-item" onclick="renderCityView('${province}', '${city}')">
+                    <div class="list-icon ${status}">${status === 'active' ? '🏘️' : '📍'}</div>
+                    <div class="list-info">
+                        <div class="list-name">${city}</div>
+                        <div class="list-center">${center}</div>
+                    </div>
+                    <span class="list-status status-${status}">${statusText}</span>
+                </div>
+                `;
+            }).join('');
+        }
+
+        // ===== 显示区县列表（右侧） =====
+        function showDistrictList(province, cityName) {
+            document.getElementById('cityDetailTitle').innerHTML = `📍 ${cityName}`;
+            const list = document.getElementById('listContainer');
+            const districts = cityDistricts[cityName] || [];
+
+            if (districts.length === 0) {
+                list.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><p>该地级市暂无区县数据</p></div>';
+                return;
+            }
+
+            // 苏州特殊处理：分成"苏州总部"和"常熟城市中心"两个子组
+            if (cityName === '苏州市') {
+                const changShuDistricts = ['常熟市'];
+                const suzhouHQDistricts = districts.filter(d => !changShuDistricts.includes(d));
+                const changShuList = districts.filter(d => changShuDistricts.includes(d));
+
+                const renderGroup = (groupName, groupDistricts) => {
+                    const items = groupDistricts.map(district => {
+                        const d = getDistrictData(cityName, district);
+                        const status = d && d.businesses && d.businesses.length > 0 ? 'active' : 'none';
+                        const statusText = status === 'active' ? '有业务' : '未开展业务';
+                        return `
+                        <div class="list-item" onclick="showDistrictDetail('${province}', '${cityName}', '${district}')">
+                            <div class="list-icon ${status}">${status === 'active' ? '🏘️' : '📍'}</div>
+                            <div class="list-info">
+                                <div class="list-name">${district}</div>
+                            </div>
+                            <span class="list-status status-${status}">${statusText}</span>
+                        </div>`;
+                    }).join('');
+                    return `
+                    <div style="margin-bottom:12px;">
+                        <div style="font-size:0.82em;color:#a5b4fc;font-weight:600;padding:6px 12px;margin-bottom:4px;background:rgba(102,126,234,0.15);border-radius:8px;">📌 ${groupName}</div>
+                        ${items}
+                    </div>`;
+                };
+
+                list.innerHTML = renderGroup('苏州总部', suzhouHQDistricts) + renderGroup('常熟城市中心', changShuList);
+                return;
+            }
+
+            list.innerHTML = districts.map(district => {
+                const d = getDistrictData(cityName, district);
+                const center = d ? d.center : '';
+                const status = d && d.businesses && d.businesses.length > 0 ? 'active' : 'none';
+                const statusText = status === 'active' ? '有业务' : '未开展业务';
+
+                return `
+                <div class="list-item" onclick="showDistrictDetail('${province}', '${cityName}', '${district}')">
+                    <div class="list-icon ${status}">${status === 'active' ? '🏘️' : '📍'}</div>
+                    <div class="list-info">
+                        <div class="list-name">${district}</div>
+                        ${center ? `<div class="list-center">${center}</div>` : ''}
+                    </div>
+                    <span class="list-status status-${status}">${statusText}</span>
+                </div>
+                `;
+            }).join('');
+        }
+
+        // ===== 区县详情视图（16个业务线） =====
+        function showDistrictDetail(province, cityName, districtName) {
+            currentView = 'district';
+            currentProvince = province;
+            currentCity = cityName;
+            currentDistrict = districtName;
+            updateBreadcrumb();
+
+            document.getElementById('cityDetailTitle').innerHTML = `📍 ${districtName}`;
+            const list = document.getElementById('listContainer');
+            const d = getDistrictData(cityName, districtName);
+
+            // 无论有无业务数据，都显示16个业务线（没有则全部待开展）
+            const centerName = d ? d.center : '积极拓展中';
+            
+            // 计算合计
+            let totalCount = 0;
+            let activeCount = 0;
+            
+            list.innerHTML = allBusinessLines.map(b => {
+                const businessStatus = d && d.businesses ? d.businesses.find(db => db.name === b.name) : null;
+                const status = businessStatus ? businessStatus.status : 'none';
+                const statusText = status === 'active' ? '已开展' : '待开展';
+                const statusIcon = status === 'active' ? '🏘️' : '🟠';
+                const count = status === 'active' && businessStatus.count ? businessStatus.count : 0;
+                
+                if (status === 'active') {
+                    totalCount += count;
+                    activeCount++;
+                }
+
+                const countBadge = count > 0 ? `<span class="list-count">${count}个</span>` : '';
+
+                return `
+                <div class="list-item">
+                    <div class="list-icon ${status}">${statusIcon}</div>
+                    <div class="list-info">
+                        <div class="list-name">${b.name}</div>
+                        <div class="list-center">${centerName}</div>
+                    </div>
+                    ${countBadge}
+                    <span class="list-status status-${status}">${statusText}</span>
+                </div>
+                `;
+            }).join('');
+            
+            // 添加合计卡片
+            const totalCard = document.createElement('div');
+            totalCard.className = 'total-card';
+            totalCard.innerHTML = `
+                <div class="total-stat">
+                    <div class="total-label">经营单元合计</div>
+                    <div class="total-number">${totalCount}</div>
+                    <div class="total-unit">个</div>
+                </div>
+                <div class="total-divider"></div>
+                <div class="total-stat">
+                    <div class="total-label">已开展业务</div>
+                    <div class="total-number">${activeCount}</div>
+                    <div class="total-unit">条</div>
+                </div>
+            `;
+            list.insertBefore(totalCard, list.firstChild);
+        }
+
+        // ===== 获取城市状态颜色 =====
+        function getCityStatusColor(city) {
+            const d = cityBusinessData[city];
+            if (!d) return '#3b82f6'; // 蓝色 - 表中有但无业务数据
+            if (d.status === 'active') return '#10b981'; // 绿色 - 有业务
+            if (d.status === 'expanding') return '#3b82f6'; // 蓝色 - 积极拓展
+            return '#9ca3af'; // 灰色 - 无业务
+        }
+
+        // ===== 更新面包屑导航 =====
+        function updateBreadcrumb() {
+            const el = document.getElementById('breadcrumb');
+            if (currentView === 'china') {
+                el.innerHTML = '<span class="breadcrumb-item active">🏠 全国</span>';
+            } else if (currentView === 'province') {
+                el.innerHTML = `
+                    <span class="breadcrumb-item" onclick="renderChinaMap()">🏠 全国</span>
+                    <span class="breadcrumb-item breadcrumb-sep">›</span>
+                    <span class="breadcrumb-item active">${currentProvince}</span>
+                `;
+            } else if (currentView === 'city') {
+                el.innerHTML = `
+                    <span class="breadcrumb-item" onclick="renderChinaMap()">🏠 全国</span>
+                    <span class="breadcrumb-item breadcrumb-sep">›</span>
+                    <span class="breadcrumb-item" onclick="renderProvinceMap('${currentProvince}')">${currentProvince}</span>
+                    <span class="breadcrumb-item breadcrumb-sep">›</span>
+                    <span class="breadcrumb-item active">${currentCity}</span>
+                `;
+            } else if (currentView === 'district') {
+                el.innerHTML = `
+                    <span class="breadcrumb-item" onclick="renderChinaMap()">🏠 全国</span>
+                    <span class="breadcrumb-item breadcrumb-sep">›</span>
+                    <span class="breadcrumb-item" onclick="renderProvinceMap('${currentProvince}')">${currentProvince}</span>
+                    <span class="breadcrumb-item breadcrumb-sep">›</span>
+                    <span class="breadcrumb-item" onclick="renderCityView('${currentProvince}', '${currentCity}')">${currentCity}</span>
+                    <span class="breadcrumb-item breadcrumb-sep">›</span>
+                    <span class="breadcrumb-item active">${currentDistrict}</span>
+                `;
+            }
+        }
+
+        // ===== 更新统计数据 =====
+        function updateStats() {
+            const provinces = new Set(Object.keys(provinceStrategicCities));
+            const cities = Object.keys(cityBusinessData);
+            let activeCities = 0, expandingCities = 0;
+
+            cities.forEach(c => {
+                const d = cityBusinessData[c];
+                if (d) {
+                    if (d.status === 'active') activeCities++;
+                    else if (d.status === 'expanding') expandingCities++;
+                }
+            });
+
+            document.getElementById('provinceCount').textContent = provinces.size;
+            document.getElementById('cityCount').textContent = cities.length;
+            document.getElementById('businessCount').textContent = activeCities;
+            document.getElementById('expandingCount').textContent = expandingCities;
+        }
+
+        // ===== 页面加载完成后初始化 =====
+        window.onload = initChart;
+    </script>
+</body>
+</html>
